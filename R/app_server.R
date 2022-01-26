@@ -18,9 +18,9 @@ app_server <- function( input, output, session ) {
 
   ## For volumes parse
   volumes <- getVolumes()
-  shinyDirChoose(input, 'df_indiv_xp', root=volumes, session=session)
+  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
   folder_path <- reactive({
-    return(print(parseDirPath(volumes, input$df_indiv_xp)))
+    return(print(parseDirPath(volumes, input$folder_path)))
   })
 
   # Parse local folder
