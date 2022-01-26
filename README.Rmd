@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Welcome to StatAid
+# Welcome to hemRNA
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -29,8 +29,8 @@ You can install the development version from [GitHub](https://github.com/Vincent
 
 ```{r Github install }
 
-install.packages("remotes")
-remotes::install_github("VincentAlcazer/hemRNA")
-
-hemRNA::run_app()
+# install.packages("remotes")
+# remotes::install_github("VincentAlcazer/hemRNA")
+# 
+# hemRNA::run_app()
 ```
