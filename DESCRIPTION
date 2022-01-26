@@ -1,0 +1,41 @@
+Package: hemRNA
+Title: A package for quick RNAseq data analysis
+Version: 0.0.0.9000
+Authors@R: person('Vincent', 'Alcazer', email = 'vincent.alcazer@chu-lyon.fr', role = c('cre', 'aut'))
+Description: PKG_DESC.
+License: MIT + file LICENSE
+Imports: 
+    apeglm,
+    attempt,
+    config (>= 0.3.1),
+    DESeq2,
+    dplyr,
+    DT,
+    factoextra,
+    forcats,
+    ggplot2,
+    ggrepel,
+    glue,
+    golem (>= 0.3.1),
+    htmltools,
+    processx,
+    readxl,
+    rtracklayer,
+    shiny (>= 1.7.1),
+    shinycssloaders,
+    shinydashboard,
+    shinydashboardPlus,
+    shinyFiles,
+    tibble,
+    tidyr,
+    tximport,
+    vcfR,
+    viridis
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
+Suggests: 
+    spelling,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Language: en-US
