@@ -29,7 +29,7 @@ You can install the development version from [GitHub](https://github.com/Vincent
 
 ```{r Github install, eval = F, message=FALSE, warning=FALSE}
 
-## Github install
+## Github install 
  install.packages("remotes")
  remotes::install_github("VincentAlcazer/hemRNA", force = T)
  

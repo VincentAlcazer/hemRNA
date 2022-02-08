@@ -23,7 +23,7 @@ You can install the development version from
 repository or directly downloading the package in R:
 
 ``` r
-## Github install
+## Github install 
  install.packages("remotes")
  remotes::install_github("VincentAlcazer/hemRNA", force = T)
  
