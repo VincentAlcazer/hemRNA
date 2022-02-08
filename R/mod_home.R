@@ -22,7 +22,7 @@ mod_home_ui <- function(id){
              h2("Change log"),
 
              HTML("
-            08-02-2022: v0.41 - Stability improvement & bug fixes <br/>
+            08-02-2022: v0.4.1 - Stability improvement & bug fixes <br/>
             26-01-2022: v0.4 - CNV module & hotspot module improvement <br/>
             19-01-2022: v0.3 - Variant calling GATK module <br/>
             20-12-2021: v0.2 - Fusion & hotspot modules <br/>
