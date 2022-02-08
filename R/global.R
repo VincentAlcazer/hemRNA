@@ -1,7 +1,7 @@
 
 #' Global parameters
 #'
-#' @import shinyfiles
+#' @import shinyFiles
 #' @import ggplot2
 #' @import dplyr
 #' @import tibble

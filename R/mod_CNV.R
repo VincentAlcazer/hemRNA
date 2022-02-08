@@ -15,11 +15,12 @@ mod_CNV_ui <- function(id){
       tabsetPanel(
         id = "variant", type = "tabs",
         tabPanel("Individual graph",
-                 p("Methods: Mean norm count per cytoband are calculated for each patient.
+                 HTML("Methods: Mean norm count per cytoband are calculated for each patient.
                     The mean norm count per patient is then divided by the mean norm count of the overall cohort
                     per cytoband.
                     The log2(ratio) is represented.
-                    Important variations (fold change between -4 and +4)are outlined with dashed lines.
+                    Important variations (fold change between -4 and +4)are outlined with dashed lines. <br/>
+                    <b> /!\\ This CNV module has been developped for a targeted NGS panel and require a bed file to be selected (Data loading module) /!\\ </b>
                    "),
                  # column(5,
                  #        radioButtons(ns("count_type"),

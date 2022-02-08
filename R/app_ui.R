@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.4"
+        title = "hemRNA v0.41"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################
@@ -77,10 +77,11 @@ app_ui <- function(request) {
 
                                    htmlOutput("fusion_check"),
                                    htmlOutput("hotspot_check"),
-                                   htmlOutput("variant_check"),
-                                    p("Preview"),
-                                    downloadButton("download_table", "Download table (.tsv)"),
-                                    shinycssloaders::withSpinner(DT::DTOutput("preview_data"),type = 6)
+                                   htmlOutput("cnv_check")
+
+                                    # p("Preview"),
+                                    # downloadButton("download_table", "Download table (.tsv)"),
+                                    # shinycssloaders::withSpinner(DT::DTOutput("preview_data"),type = 6)
 
                                ),# box
                                box(title = "Meta", width = 6,
@@ -210,13 +211,23 @@ app_ui <- function(request) {
 
         tabItem("variant",
                 h1("Variant calling"),
-                p("Methods: "),
+                HTML("Methods: bam were generated according to the GATK good practice pipeline,
+                including: <br/>
+                - Fastq reads alignement against hg19 reference genome with 1000 genome decoy using STAR (gencode v19 annotation) <br/>
+                - Bam processing with markduplicates, SplitNCigarReads and baserecalibration (BQSR) <br/>
+                BQSR corrected BAM were then processed with 3 different caller: <br/>
+               - GATK HaplotypeCaller with default parameters and -dont-use-soft-clipped-bases -dbsnp parameters with the dbsnp138 reference.
+               Basic filter was then appllied (--window 35, --cluster 3, FS > 30, QD < 2) <br/>
+               - Freebayes with default parameters and --use-duplicate-reads --standard-filters <br/>
+               - Samtools mpileup with -Q 30
+            "),
+
 
                 tabsetPanel(
                   id = "variant_sub", type = "tabs",
-                  tabPanel("Overall",
-                           mod_variant_ui("variant_ui_1")
-                  ),#tabsetpanel
+                  # tabPanel("Overall",
+                  #          mod_variant_ui("variant_ui_1")
+                  # ),#tabsetpanel
                   tabPanel("GATK",
                            mod_variant_GATK_ui("variant_GATK_ui_1")
                            )

@@ -11,21 +11,20 @@ mod_variant_GATK_ui <- function(id){
   ns <- NS(id)
   tagList(
     fluidPage(
-      tabsetPanel(
-        id = "variant", type = "tabs",
-        tabPanel("Graph",
-
-                 column(8, shinycssloaders::withSpinner(plotOutput(ns("tileplot")),type=6)
-                 ),
-                 column(1)
-        ), #tabPanel
-
-        tabPanel("Result table",
+      htmlOutput(ns("variant_check")),
+      # tabsetPanel(
+      #   id = "variant", type = "tabs",
+      #   tabPanel("Result table",
                  column(8, shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
                  ),
-                 column(1)
-        )
-      ),##tabsetpanel
+                 column(1),
+      #   )
+      # ),##tabsetpanel
+    #   tabPanel("Graph"
+    #            #column(8, shinycssloaders::withSpinner(plotOutput(ns("tileplot")),type=6)
+    #   ),
+    #   column(1)
+    # ), #tabPanel
 
       column(2,
              absolutePanel(
@@ -72,15 +71,35 @@ mod_variant_GATK_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    vcf_path <- reactive({r$test$GATK_path})
+    folder_path <- reactive({
+      req(r$test$folder_path)
+      r$test$folder_path
+      })
 
     GATK_vcf <- reactive({
 
-      req(vcf_path())
+      req(folder_path())
+      files <- list.files(paste0(folder_path(),"/variant/"), full.names = T, pattern = "GATK_haplocaller_merged.vcf.gz$")
 
-      vcf <- vcfR::vcfR2tidy(vcfR::read.vcfR(r$test$GATK_path, verbose = FALSE ))$fix
+      if(length(files)==0 | is.null(files)){
+        message("No GATK variant file detected")
+        message(folder_path())
+      } else {
+
+      vcf <- vcfR::vcfR2tidy(vcfR::read.vcfR(files, verbose = FALSE ), single_frame = T)$dat %>% filter(is.na(gt_AD) == F)
 
       return(vcf)
+      }
+
+    })
+
+
+    output$variant_check <- renderText({
+      validate(
+        need(GATK_vcf(), "No GATK mutation data detected" )
+      )
+
+      paste("<font color=\"#21bf88\"><b>Variant: GATK Mutation data successfully loaded!</b></font>"  )
 
     })
 
@@ -122,8 +141,9 @@ mod_variant_GATK_server <- function(id, r){
 
 
     filt_vcf <- reactive({
-
+      req(GATK_vcf())
       dat <- GATK_vcf() %>%
+        select(Indiv, everything()) %>%
         filter(DB == input$DB,
                QD > input$QD,
                FS < input$FS,

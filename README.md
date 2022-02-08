@@ -19,12 +19,18 @@ compilation and deployment.
 ## Installation
 
 You can install the development version from
-[GitHub](https://github.com/VincentAlcazer/hemRNA) either by cloning the
-repository or directly by downloading the package in R:
+[GitHub](https://github.com/VincentAlcazer/hemRNA) by either cloning the
+repository or directly downloading the package in R:
 
 ``` r
-# install.packages("remotes")
-# remotes::install_github("VincentAlcazer/hemRNA")
-# 
-# hemRNA::run_app()
+## Github install
+ install.packages("remotes")
+ remotes::install_github("VincentAlcazer/hemRNA", force = T)
+ 
+ hemRNA::run_app()
+ 
+## Local file install
+ 
+install.packages("path_to_hemRNA-master.zip", repos = NULL, type="source", force = T)
+ 
 ```

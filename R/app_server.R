@@ -16,19 +16,19 @@ app_server <- function( input, output, session ) {
 
   ##### ===== Full results folder
 
-  ## For volumes parse
-  volumes <- getVolumes()
-  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  folder_path <- reactive({
-    return(print(parseDirPath(volumes, input$folder_path)))
-  })
+  # ## For volumes parse
+  # volumes <- getVolumes()
+  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(volumes, input$folder_path)))
+  # })
 
   # Parse local folder
-  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-  #
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
-  # })
+  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+
+  folder_path <- reactive({
+    return(print(parseDirPath(c(root='../'), input$folder_path)))
+  })
 
   ##### ===== Individual folders
 
@@ -126,6 +126,12 @@ app_server <- function( input, output, session ) {
   ftcount <- reactive({
     req(folder_path())
 
+    files <- list.files(paste0(folder_path(),"/featurecount"), pattern = "featurecount.cnt$", recursive = T, full.names = T)
+
+    if(length(files)==0 | is.null(files)){
+      message("No ftcount expression file detected")
+    } else {
+
     dat <- read.delim(paste0(folder_path(),"/featurecount/featurecount.cnt"), skip=1, stringsAsFactors = F)
     colnames(dat) <- gsub("X.*.bam.(.*.)_hg19_BQSR.bam$","\\1",colnames(dat))
 
@@ -138,6 +144,7 @@ app_server <- function( input, output, session ) {
     dat <- cbind(dat,TPM,CPM)
 
     return(dat)
+    }
 
   })
 
@@ -216,7 +223,7 @@ app_server <- function( input, output, session ) {
 }
   })
 
-  ### === GATK
+
 
   ##### ===== Meta
 
@@ -249,8 +256,7 @@ app_server <- function( input, output, session ) {
 
 
   observe({
-    req(folder_path())
-    r$test$GATK_path <- paste0(folder_path(),"/variant/GATK_haplocaller_merged.vcf.gz")
+    r$test$folder_path <- folder_path()
   })
 
   observe({
@@ -330,15 +336,16 @@ app_server <- function( input, output, session ) {
 
   })
 
-
-  output$variant_check <- renderText({
+  output$cnv_check <- renderText({
     validate(
-      need(r$test$GATK_path, "Variant: No mutation data detected" )
+      need(r$test$ftcount, "CNV: No ftcount data detected" )
     )
 
-    paste("<font color=\"#21bf88\"><b>Variant: Mutation data successfully loaded!</b></font>"  )
+    paste("<font color=\"#21bf88\"><b>CNV: Ftcount data successfully loaded!</b></font>"  )
 
   })
+
+
 
 
   output$preview_data <- DT::renderDT(
