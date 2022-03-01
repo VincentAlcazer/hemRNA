@@ -79,14 +79,16 @@ mod_variant_GATK_server <- function(id, r){
     GATK_vcf <- reactive({
 
       req(folder_path())
-      files <- list.files(paste0(folder_path(),"/variant/"), full.names = T, pattern = "GATK_haplocaller_merged.vcf.gz$")
+      files <- list.files(paste0(folder_path(),"/variant"), full.names = T, pattern = "GATK_haplocaller_merged.vcf.gz$")
 
-      if(length(files)==0 | is.null(files)){
+      if(length(files) == 0 | is.null(files) | file.info(files)$size == 0){
         message("No GATK variant file detected")
         message(folder_path())
       } else {
 
-      vcf <- vcfR::vcfR2tidy(vcfR::read.vcfR(files, verbose = FALSE ), single_frame = T)$dat %>% filter(is.na(gt_AD) == F)
+        try(vcf <- vcfR::vcfR2tidy(vcfR::read.vcfR(files, verbose = FALSE ), single_frame = T)$dat %>% filter(is.na(gt_AD) == F),
+            silent = T)
+
 
       return(vcf)
       }

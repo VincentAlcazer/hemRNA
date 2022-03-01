@@ -17,18 +17,18 @@ app_server <- function( input, output, session ) {
   ##### ===== Full results folder
 
   # ## For volumes parse
-  volumes <- getVolumes()
-  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  folder_path <- reactive({
-    return(print(parseDirPath(volumes, input$folder_path)))
-  })
+  # volumes <- getVolumes()
+  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(volumes, input$folder_path)))
+  # })
 
   # Parse local folder
-  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-  #
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
-  # })
+  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+
+  folder_path <- reactive({
+    return(print(parseDirPath(c(root='../'), input$folder_path)))
+  })
 
   ##### ===== Individual folders
 
@@ -141,33 +141,6 @@ app_server <- function( input, output, session ) {
 
   })
 
-  ##### ===== Featurecount
-
-
-  ftcount <- reactive({
-    req(folder_path())
-
-    files <- list.files(paste0(folder_path(),"/featurecount"), pattern = "featurecount.cnt$", recursive = T, full.names = T)
-
-    if(length(files)==0 | is.null(files)){
-      message("No ftcount expression file detected")
-    } else {
-
-    dat <- read.delim(paste0(folder_path(),"/featurecount/featurecount.cnt"), skip=1, stringsAsFactors = F)
-    colnames(dat) <- gsub("X.*.bam.(.*.)_hg19_BQSR.bam$","\\1",colnames(dat))
-
-    TPM <- tpm_approx( dat[,7:ncol(dat)], dat$Length)
-    colnames(TPM) <- paste0(colnames(TPM),"_TPM")
-
-    CPM <- cpm_approx( dat[,7:ncol(dat)])
-    colnames(CPM) <- paste0(colnames(CPM),"_CPM")
-
-    dat <- cbind(dat,TPM,CPM)
-
-    return(dat)
-    }
-
-  })
 
 
   ##### ===== Fusion df
@@ -180,10 +153,10 @@ app_server <- function( input, output, session ) {
     files <- list.files(paste0(folder_path(),"/fusion/arriba"),pattern="_arriba_fusions.tsv", recursive = T, full.names = T)
     names(files) <- gsub("_arriba_fusions.tsv$","", list.files(paste0(folder_path(),"/fusion/arriba"), pattern = "_arriba_fusions.tsv", recursive = T))
 
-    if(length(files)==0 | is.null(files)){
-      message("No fusion file detected")
+    if(length(files) == 0 | is.null(files)){
+      message("No arriba fusion data detected")
     } else {
-
+      message("Loading arriba fusion data")
     file_list <- list()
     for(i in 1:length(files)){
 
@@ -314,6 +287,35 @@ app_server <- function( input, output, session ) {
   })
 
 
+  ##### ===== Featurecount
+
+
+  ftcount <- reactive({
+    req(folder_path())
+
+    files <- list.files(paste0(folder_path(),"/featurecount"), pattern = "featurecount.cnt$", recursive = T, full.names = T)
+
+    if(length(files)==0 | is.null(files)){
+      message("No ftcount expression file detected")
+    } else {
+
+      dat <- read.delim(paste0(folder_path(),"/featurecount/featurecount.cnt"), skip=1, stringsAsFactors = F)
+      colnames(dat) <- gsub("X.*.bam.(.*.)_hg19_BQSR.bam$","\\1",colnames(dat))
+
+      TPM <- tpm_approx( dat[,7:ncol(dat)], dat$Length)
+      colnames(TPM) <- paste0(colnames(TPM),"_TPM")
+
+      CPM <- cpm_approx( dat[,7:ncol(dat)])
+      colnames(CPM) <- paste0(colnames(CPM),"_CPM")
+
+      dat <- cbind(dat,TPM,CPM)
+
+      return(dat)
+    }
+
+  })
+
+
 
   ##### ===== Meta
 
@@ -367,9 +369,7 @@ app_server <- function( input, output, session ) {
    r$test$df_filt <- df_filt()
   })
 
-  observe({
-    r$test$ftcount <- ftcount()
-  })
+
 
   observe({
     r$test$meta <- meta()
@@ -389,6 +389,10 @@ app_server <- function( input, output, session ) {
 
   observe({
     r$test$df_hotspot <- df_hotspot()
+  })
+
+  observe({
+    r$test$ftcount <- ftcount()
   })
 
 
@@ -431,7 +435,7 @@ app_server <- function( input, output, session ) {
 
   output$fusion_catcher_check <- renderText({
     validate(
-      need(r$test$df_arriba, "NF-Core: No fusion data detected" )
+      need(r$test$df_fusioncatcher, "NF-Core: No fusion data detected" )
     )
 
     paste("<font color=\"#21bf88\"><b>NF-Core: Fusion catcher data successfully loaded!</b></font>"  )
