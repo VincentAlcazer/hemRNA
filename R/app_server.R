@@ -42,7 +42,9 @@ app_server <- function( input, output, session ) {
   ##### ===== Signatures list
 
   sig_list <- reactive({
-    sig_files <- list.files("extdata/signatures/")
+
+    sig_dir <- system.file("extdata","signatures", package = "hemRNA")
+    sig_files <- list.files(sig_dir)
 
     sig_list <- list()
 
@@ -50,7 +52,7 @@ app_server <- function( input, output, session ) {
 
       name <- gsub(".txt$","",sig)
 
-      sig_list[[name]] <- read.table(paste0("extdata/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
+      sig_list[[name]] <- read.table(paste0(sig_dir,"/",sig), sep = "\t", stringsAsFactors = F, header = T)
 
     }
 
