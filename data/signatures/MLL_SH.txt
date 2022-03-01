@@ -1,0 +1,8 @@
+gene_id	coef
+HOXA9	4
+HOXA10	2
+MECOM	4
+CDK6	1
+MEF2C	1
+FLT3	4
+CD44	-1

@@ -33,6 +33,7 @@ usethis::use_package("forcats")
 usethis::use_package("viridis")
 usethis::use_package("vcfR")
 
+
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module( name = "home" ) # Name of the module

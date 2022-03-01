@@ -17,18 +17,18 @@ app_server <- function( input, output, session ) {
   ##### ===== Full results folder
 
   # ## For volumes parse
-  # volumes <- getVolumes()
-  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(volumes, input$folder_path)))
-  # })
+  volumes <- getVolumes()
+  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  folder_path <- reactive({
+    return(print(parseDirPath(volumes, input$folder_path)))
+  })
 
   # Parse local folder
-  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-
-  folder_path <- reactive({
-    return(print(parseDirPath(c(root='../'), input$folder_path)))
-  })
+  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+  #
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
+  # })
 
   ##### ===== Individual folders
 
@@ -38,6 +38,25 @@ app_server <- function( input, output, session ) {
   # path1 <- reactive({
   #   return(print(parseDirPath(c(root='../'), input$df_indiv_xp)))
   # })
+
+  ##### ===== Signatures list
+
+  sig_list <- reactive({
+    sig_files <- list.files("data/signatures/")
+
+    sig_list <- list()
+
+    for(sig in sig_files){
+
+      name <- gsub(".txt$","",sig)
+
+      sig_list[[name]] <- read.table(paste0("data/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
+
+    }
+
+    return(sig_list)
+  })
+
 
 
   ##### ===== Salmon expression df
@@ -257,6 +276,10 @@ app_server <- function( input, output, session ) {
 
   observe({
     r$test$folder_path <- folder_path()
+  })
+
+  observe({
+    r$test$sig_list <- sig_list()
   })
 
   observe({
