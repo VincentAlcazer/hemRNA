@@ -19,25 +19,25 @@
 tx2gene <- read.delim("data/gencode_v38_tx2Gene.tsv")
 gene_anno <- read.delim("data/gencode_v38_gene_names.tsv")
 
-# sig_files <- list.files("data/signatures/")
-#
-# sig_list <- list()
-# for(sig in sig_files){
-#
-#     name <- gsub(".txt$","",sig)
-#
-#     sig_list[[name]] <- read.table(paste0("data/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
-#
-# }
+sig_files <- list.files("inst/extdata/signatures/")
 
-bed_files <- list.files("data/bed_panels/")
+sig_list <- list()
+for(sig in sig_files){
+
+    name <- gsub(".txt$","",sig)
+
+    sig_list[[name]] <- read.table(paste0("inst/extdata/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
+
+}
+
+bed_files <- list.files("inst/extdata/bed_panels/")
 
 bed_list <- list()
 for(bed in bed_files){
 
   name <- gsub(".bed$","",bed)
 
-  bed_list[[name]] <- read.table(paste0("data/bed_panels/",bed), sep = "\t", stringsAsFactors = F, header = F)
+  bed_list[[name]] <- read.table(paste0("inst/extdata/bed_panels/",bed), sep = "\t", stringsAsFactors = F, header = F)
   colnames(bed_list[[name]])[1:4] <- c("chr","start","end","gene_name")
 
 }

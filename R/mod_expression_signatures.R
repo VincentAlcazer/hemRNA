@@ -61,13 +61,13 @@ mod_expression_signatures_server <- function(id, r){
 
     df_filt <- reactive({r$test$df_filt})
 
-    sig_list <- reactive({r$test$sig_list})
+    #sig_list <- reactive({r$test$sig_list})
 
     observe({
       updateSelectInput(
         session,
         "Signatures",
-        choices = c(names(sig_list()))
+        choices = c(names(sig_list))
       )
     })
 

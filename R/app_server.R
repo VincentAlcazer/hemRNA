@@ -41,21 +41,21 @@ app_server <- function( input, output, session ) {
 
   ##### ===== Signatures list
 
-  sig_list <- reactive({
-    sig_files <- list.files("data/signatures/")
-
-    sig_list <- list()
-
-    for(sig in sig_files){
-
-      name <- gsub(".txt$","",sig)
-
-      sig_list[[name]] <- read.table(paste0("data/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
-
-    }
-
-    return(sig_list)
-  })
+  # sig_list <- reactive({
+  #   sig_files <- list.files("data/signatures/")
+  #
+  #   sig_list <- list()
+  #
+  #   for(sig in sig_files){
+  #
+  #     name <- gsub(".txt$","",sig)
+  #
+  #     sig_list[[name]] <- read.table(paste0("data/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
+  #
+  #   }
+  #
+  #   return(sig_list)
+  # })
 
 
 
@@ -278,9 +278,9 @@ app_server <- function( input, output, session ) {
     r$test$folder_path <- folder_path()
   })
 
-  observe({
-    r$test$sig_list <- sig_list()
-  })
+  # observe({
+  #   r$test$sig_list <- sig_list()
+  # })
 
   observe({
     r$test$txi <- txi()
