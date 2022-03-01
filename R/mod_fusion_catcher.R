@@ -1,4 +1,4 @@
-#' fusion UI Function
+#' fusion_catcher UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,14 +7,11 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_fusion_ui <- function(id){
+mod_fusion_catcher_ui <- function(id){
   ns <- NS(id)
   tagList(
 
     fluidPage(
-      h1("Fusion detection"),
-      p("Methods: arriba with all filters. High confidence are shown by default."),
-
       tabsetPanel(
         id = "fusion", type = "tabs",
         tabPanel("Overall graph",
@@ -24,14 +21,14 @@ mod_fusion_ui <- function(id){
                  column(1)
 
 
-                 ),#tabsetpanel
+        ),#tabsetpanel
         tabPanel("Result table",
                  column(8,
                         downloadButton(ns("download_table"), "Download table (.tsv)"),
                         shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
                  ),
                  column(1)
-                 )
+        )
       ),##tabsetpanel
 
       column(2,
@@ -39,12 +36,16 @@ mod_fusion_ui <- function(id){
                width = 200, right = 20, draggable = T,
                style = "opacity: 0.85",
                wellPanel(
-                 checkboxGroupInput(ns("confidence"),
-                               label = c("Confidence"),
-                               choices = c("High"="high",
-                                           "Medium"="medium",
-                                           "Low"="low"),
-                               selected = "high"),
+                 checkboxGroupInput(ns("tools"),
+                                    label = c("Tools"),
+                                    choices = c("Bowtie + STAR"="BOWTIE\\+STAR",
+                                                "Bowtie"="BOWTIE",
+                                                "STAR"="STAR"),
+                                    selected = "BOWTIE\\+STAR"),
+                 numericInput(ns("spanning_reads"), label = "Min. unique spanning reads",
+                              min = 0, value = 10),
+                 numericInput(ns("common_reads"), label = "Min. common mapping reads",
+                             min = 0, value = 0),
                  sliderInput(ns("y_size"), label = "y-axis font size",
                              min = 1, max = 30, value = 12, step= 1),
                  sliderInput(ns("x_size"), label = "x-axis font size",
@@ -67,25 +68,28 @@ mod_fusion_ui <- function(id){
 
     ) # Fluidpage
 
+
   )
 }
 
-#' fusion Server Functions
+#' fusion_catcher Server Functions
 #'
 #' @noRd
-mod_fusion_server <- function(id, r){
+mod_fusion_catcher_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    df_fusion <- reactive({r$test$df_arriba})
+    df_fusion <- reactive({r$test$df_fusioncatcher})
 
     plot <- reactive({
 
       req(df_fusion())
 
       plot <- df_fusion() %>%
-        filter(confidence %in% c(input$confidence)) %>%
-        ggplot(aes(x = sample_id, y = fusion, fill = confidence)) +
+        filter(grepl(input$tools, Fusion_finding_method),
+               Spanning_unique_reads >= input$spanning_reads,
+               Counts_of_common_mapping_reads >= input$common_reads) %>%
+        ggplot(aes(x = sample_id, y = fusion, fill = Fusion_finding_method)) +
         geom_tile() +
         labs(x="", y="")
 
@@ -120,8 +124,10 @@ mod_fusion_server <- function(id, r){
     output$result_table <- DT::renderDT(
 
       df_fusion() %>%
-        select(sample_id, gene1, gene2, confidence, type, reading_frame, everything()) %>%
-        filter(confidence %in% c(input$confidence)), # data
+        select(sample_id, gene1, gene2, Fusion_finding_method, type, reading_frame, everything()) %>%
+      filter(grepl(input$tools, Fusion_finding_method),
+             Spanning_unique_reads >= input$spanning_reads,
+             Counts_of_common_mapping_reads >= input$common_reads), # data
       class = "display nowrap compact", # style
       filter = "top", # location of column filters
       server = T,
@@ -137,21 +143,20 @@ mod_fusion_server <- function(id, r){
 
     output$download_table <- downloadHandler(
       filename = function() {
-        paste("Arriba_fusion.tsv")
+        paste("Fusioncatcher.tsv")
       },
       content = function(file) {
         write.table(df_fusion() %>%
-                            select(sample_id, gene1, gene2, confidence, type, reading_frame, everything()) %>%
-                            filter(confidence %in% c(input$confidence)), file, row.names = FALSE, sep = "\t", quote = F)
+                            select(sample_id, gene1, gene2, Fusion_finding_method, type, reading_frame, everything()),
+        file, row.names = FALSE, sep = "\t", quote = F)
       }
     )
-
 
   })
 }
 
 ## To be copied in the UI
-# mod_fusion_ui("fusion_ui_1")
+# mod_fusion_catcher_ui("fusion_catcher_ui_1")
 
 ## To be copied in the server
-# mod_fusion_server("fusion_ui_1")
+# mod_fusion_catcher_server("fusion_catcher_ui_1")

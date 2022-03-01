@@ -45,6 +45,8 @@ golem::add_module( name = "expression_individual" )
 golem::add_module( name = "expression_signatures" )
 
 golem::add_module( name = "fusion" )
+golem::add_module( name = "fusion_catcher" )
+golem::add_module( name = "star_fusion" )
 
 golem::add_module( name = "variant" )
 golem::add_module( name = "variant_GATK" )

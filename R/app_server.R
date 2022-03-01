@@ -17,18 +17,18 @@ app_server <- function( input, output, session ) {
   ##### ===== Full results folder
 
   # ## For volumes parse
-  volumes <- getVolumes()
-  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  folder_path <- reactive({
-    return(print(parseDirPath(volumes, input$folder_path)))
-  })
+  # volumes <- getVolumes()
+  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(volumes, input$folder_path)))
+  # })
 
   # Parse local folder
-  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-  #
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
-  # })
+  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+
+  folder_path <- reactive({
+    return(print(parseDirPath(c(root='../'), input$folder_path)))
+  })
 
   ##### ===== Individual folders
 
@@ -174,7 +174,7 @@ app_server <- function( input, output, session ) {
 
   ### === arriba
 
-  df_fusion <- reactive({
+  df_arriba <- reactive({
 
     req(folder_path())
     files <- list.files(paste0(folder_path(),"/fusion/arriba"),pattern="_arriba_fusions.tsv", recursive = T, full.names = T)
@@ -195,6 +195,75 @@ app_server <- function( input, output, session ) {
       mutate(tool = "arriba", fusion = paste0(gene1,"-",gene2))
 
     return(dat)
+    }
+
+  })
+
+  ### === FusionCatcher
+
+  df_fusioncatcher <- reactive({
+
+    req(folder_path())
+    files <- list.files(paste0(folder_path(),"/nf-core/ArborescenceParEchantillon"), pattern = "_fusioncatcher.txt", recursive = T, full.names = T)
+
+    names(files) <- gsub("/Fusioncatcher/.*.$","",
+                         list.files(paste0(folder_path(),"/nf-core/ArborescenceParEchantillon"), pattern = "_fusioncatcher.txt", recursive = T))
+
+
+    if(length(files)==0 | is.null(files)){
+      message("No fusion file detected")
+    } else {
+
+      file_list <- list()
+      for(i in 1:length(files)){
+
+        file_list[[names(files[i])]] <- data.table::fread(files[i], data.table = F)
+
+      }
+      dat <- bind_rows(file_list, .id = "sample_id") %>%
+        mutate(type = NA, site1 = NA, site2 = NA) %>%
+        select(sample_id, gene1 =`Gene_1_symbol(5end_fusion_partner)`, gene2 = `Gene_2_symbol(3end_fusion_partner)`,
+               type, reading_frame = Predicted_effect,
+               breakpoint1 = `Fusion_point_for_gene_1(5end_fusion_partner)`, site1,
+               breakpoint2 = `Fusion_point_for_gene_2(3end_fusion_partner)`, site2, everything()) %>%
+        mutate(tool = "fusion_catcher", fusion = paste0(gene1,"-",gene2))
+
+      return(dat)
+    }
+
+  })
+
+  ### === Starfusion
+
+  df_starfusion <- reactive({
+
+    req(folder_path())
+    files <- list.files(paste0(folder_path(),"/nf-core/ArborescenceParEchantillon"), pattern = "_star-fusion.tsv", recursive = T, full.names = T)
+
+    names(files) <- gsub("/Star-Fusion/.*.$","",
+                         list.files(paste0(folder_path(),"/nf-core/ArborescenceParEchantillon"), pattern = "_star-fusion.tsv", recursive = T))
+
+
+    if(length(files)==0 | is.null(files)){
+      message("No fusion file detected")
+    } else {
+
+      file_list <- list()
+      for(i in 1:length(files)){
+
+        file_list[[names(files[i])]] <- data.table::fread(files[i], data.table = F)
+
+      }
+      dat <- bind_rows(file_list, .id = "sample_id") %>%
+        separate(`#FusionName`, sep = "--", into=c("gene1", "gene2")) %>%
+        mutate(type = NA, site1 = NA, site2 = NA, reading_frame = NA) %>%
+        select(sample_id, gene1, gene2,
+               type, reading_frame,
+               breakpoint1 = LeftBreakpoint, site1,
+               breakpoint2 = RightBreakpoint, site2, everything()) %>%
+        mutate(tool = "star_fusion", fusion = paste0(gene1,"-",gene2))
+
+      return(dat)
     }
 
   })
@@ -307,7 +376,15 @@ app_server <- function( input, output, session ) {
   })
 
   observe({
-    r$test$df_fusion <- df_fusion()
+    r$test$df_arriba <- df_arriba()
+  })
+
+  observe({
+    r$test$df_fusioncatcher <- df_fusioncatcher()
+  })
+
+  observe({
+    r$test$df_starfusion <- df_starfusion()
   })
 
   observe({
@@ -343,12 +420,21 @@ app_server <- function( input, output, session ) {
 
   })
 
-  output$fusion_check <- renderText({
+  output$arriba_check <- renderText({
     validate(
-      need(r$test$df_fusion, "Arriba: No fusion data detected" )
+      need(r$test$df_arriba, "Arriba: No fusion data detected" )
     )
 
     paste("<font color=\"#21bf88\"><b>Arriba: Fusion data successfully loaded!</b></font>"  )
+
+  })
+
+  output$fusion_catcher_check <- renderText({
+    validate(
+      need(r$test$df_arriba, "NF-Core: No fusion data detected" )
+    )
+
+    paste("<font color=\"#21bf88\"><b>NF-Core: Fusion catcher data successfully loaded!</b></font>"  )
 
   })
 
@@ -419,6 +505,8 @@ app_server <- function( input, output, session ) {
   mod_expression_signatures_server("expression_signatures_ui_1", r=r)
 
   mod_fusion_server("fusion_ui_1", r=r)
+  mod_fusion_catcher_server("fusion_catcher_ui_1", r=r)
+  mod_star_fusion_server("star_fusion_ui_1", r=r)
 
   mod_variant_server("variant_ui_1", r=r)
   mod_variant_GATK_server("variant_GATK_ui_1", r=r)

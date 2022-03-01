@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.4.3b"
+        title = "hemRNA v0.5"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################
@@ -27,7 +27,10 @@ app_ui <- function(request) {
           menuItem("Home", tabName = "home", icon = icon("play-circle")),
           menuItem("Data loading", tabName = "data", icon = icon("spinner")),
           menuItem("Expression", tabName = "expression", icon = icon("poll")),
-          menuItem("Fusion", tabName = "fusion", icon = icon("exchange-alt")),
+          menuItem("Fusion", tabName = "fusion", icon = icon("exchange-alt"),
+                   menuSubItem("Arriba", tabName = "arriba"),
+                   menuSubItem("NF-Core", tabName = "nfcore")
+                   ),
           menuItem("Variants", tabName = "variants",icon = icon("bezier-curve"),
                    menuSubItem("Hotspot", tabName = "hotspot"),
                    menuSubItem("Variant calling", tabName = "variant")
@@ -75,7 +78,8 @@ app_ui <- function(request) {
                                    shinycssloaders::withSpinner(htmlOutput("salmon_dim"),type = 1),
                                    shinycssloaders::withSpinner(htmlOutput("panel_dim"),type = 1),
 
-                                   htmlOutput("fusion_check"),
+                                   htmlOutput("arriba_check"),
+                                   htmlOutput("fusion_catcher_check"),
                                    htmlOutput("hotspot_check"),
                                    htmlOutput("cnv_check")
 
@@ -205,7 +209,16 @@ app_ui <- function(request) {
                   )#TabSetPanel
 
         ), #tabItem
-        tabItem("fusion",mod_fusion_ui("fusion_ui_1")),
+        tabItem("arriba", mod_fusion_ui("fusion_ui_1")),
+        tabItem("nfcore",
+                h1("NF-Core"),
+                p("Results from NF-Core"),
+                tabsetPanel(
+                  id = "nfcore_tabs", type = "tabs",
+                  tabPanel("Fusion_catcher", mod_fusion_catcher_ui("fusion_catcher_ui_1")),
+                  tabPanel("star_fusion", mod_star_fusion_ui("star_fusion_ui_1"))
+                )
+                ),#tabitem
 
         tabItem("hotspot",mod_hotspot_ui("hotspot_ui_1")),
 

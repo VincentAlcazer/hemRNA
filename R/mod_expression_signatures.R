@@ -107,16 +107,13 @@ mod_expression_signatures_server <- function(id, r){
     missing_genes <- reactive({
 
       req(df_filt())
-      isolate({
-
         genes_sig <- as.character(unlist(dplyr::select(sig_list()[[input$Signatures]], 1)))
         genes_xp <- as.character(unlist(dplyr::select(df_filt(), 1)))
 
         missing_genes <- setdiff(genes_sig, genes_xp)
 
-
         return(missing_genes)
-      })
+
     })
 
     output$missing_genes <- renderText({

@@ -1,4 +1,4 @@
-#' fusion UI Function
+#' star_fusion UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,14 +7,11 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_fusion_ui <- function(id){
+mod_star_fusion_ui <- function(id){
   ns <- NS(id)
   tagList(
 
     fluidPage(
-      h1("Fusion detection"),
-      p("Methods: arriba with all filters. High confidence are shown by default."),
-
       tabsetPanel(
         id = "fusion", type = "tabs",
         tabPanel("Overall graph",
@@ -24,14 +21,14 @@ mod_fusion_ui <- function(id){
                  column(1)
 
 
-                 ),#tabsetpanel
+        ),#tabsetpanel
         tabPanel("Result table",
                  column(8,
                         downloadButton(ns("download_table"), "Download table (.tsv)"),
                         shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
                  ),
                  column(1)
-                 )
+        )
       ),##tabsetpanel
 
       column(2,
@@ -39,12 +36,12 @@ mod_fusion_ui <- function(id){
                width = 200, right = 20, draggable = T,
                style = "opacity: 0.85",
                wellPanel(
-                 checkboxGroupInput(ns("confidence"),
-                               label = c("Confidence"),
-                               choices = c("High"="high",
-                                           "Medium"="medium",
-                                           "Low"="low"),
-                               selected = "high"),
+                 numericInput(ns("FFPM"), label = "Min. Fusion Fragment per million (FFPM)",
+                              min = 0, value = 0.5),
+                 numericInput(ns("JunctionReadCount"), label = "Min. JunctionReadCount",
+                              min = 0, value = 1),
+                 numericInput(ns("SpanningFragCount"), label = "Min. SpanningFragCount",
+                              min = 0, value = 1),
                  sliderInput(ns("y_size"), label = "y-axis font size",
                              min = 1, max = 30, value = 12, step= 1),
                  sliderInput(ns("x_size"), label = "x-axis font size",
@@ -66,27 +63,30 @@ mod_fusion_ui <- function(id){
       ) # Column
 
     ) # Fluidpage
-
   )
 }
 
-#' fusion Server Functions
+#' star_fusion Server Functions
 #'
 #' @noRd
-mod_fusion_server <- function(id, r){
+mod_star_fusion_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    df_fusion <- reactive({r$test$df_arriba})
+
+    df_fusion <- reactive({r$test$df_starfusion})
 
     plot <- reactive({
 
       req(df_fusion())
 
       plot <- df_fusion() %>%
-        filter(confidence %in% c(input$confidence)) %>%
-        ggplot(aes(x = sample_id, y = fusion, fill = confidence)) +
+        filter(FFPM >= input$FFPM,
+               JunctionReadCount >= input$JunctionReadCount,
+               SpanningFragCount >= input$SpanningFragCount) %>%
+        ggplot(aes(x = sample_id, y = fusion, fill = FFPM)) +
         geom_tile() +
+        scale_fill_viridis_c() +
         labs(x="", y="")
 
       return(plot)
@@ -120,8 +120,10 @@ mod_fusion_server <- function(id, r){
     output$result_table <- DT::renderDT(
 
       df_fusion() %>%
-        select(sample_id, gene1, gene2, confidence, type, reading_frame, everything()) %>%
-        filter(confidence %in% c(input$confidence)), # data
+        select(sample_id, gene1, gene2, JunctionReadCount,SpanningFragCount, FFPM,  type, reading_frame, everything()) %>%
+        filter(FFPM >= input$FFPM,
+               JunctionReadCount >= input$JunctionReadCount,
+               SpanningFragCount >= input$SpanningFragCount), # data
       class = "display nowrap compact", # style
       filter = "top", # location of column filters
       server = T,
@@ -137,12 +139,12 @@ mod_fusion_server <- function(id, r){
 
     output$download_table <- downloadHandler(
       filename = function() {
-        paste("Arriba_fusion.tsv")
+        paste("Fusioncatcher.tsv")
       },
       content = function(file) {
         write.table(df_fusion() %>%
-                            select(sample_id, gene1, gene2, confidence, type, reading_frame, everything()) %>%
-                            filter(confidence %in% c(input$confidence)), file, row.names = FALSE, sep = "\t", quote = F)
+                      select(sample_id, gene1, gene2, FFPM, type, reading_frame, everything()),
+                    file, row.names = FALSE, sep = "\t", quote = F)
       }
     )
 
@@ -151,7 +153,7 @@ mod_fusion_server <- function(id, r){
 }
 
 ## To be copied in the UI
-# mod_fusion_ui("fusion_ui_1")
+# mod_star_fusion_ui("star_fusion_ui_1")
 
 ## To be copied in the server
-# mod_fusion_server("fusion_ui_1")
+# mod_star_fusion_server("star_fusion_ui_1")
