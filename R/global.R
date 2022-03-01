@@ -18,17 +18,17 @@
 
 tx2gene <- read.delim("data/gencode_v38_tx2Gene.tsv")
 gene_anno <- read.delim("data/gencode_v38_gene_names.tsv")
-
-sig_files <- list.files("inst/extdata/signatures/")
-
-sig_list <- list()
-for(sig in sig_files){
-
-    name <- gsub(".txt$","",sig)
-
-    sig_list[[name]] <- read.table(paste0("inst/extdata/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
-
-}
+#
+# sig_files <- list.files("inst/extdata/signatures/")
+#
+# sig_list <- list()
+# for(sig in sig_files){
+#
+#     name <- gsub(".txt$","",sig)
+#
+#     sig_list[[name]] <- read.table(paste0("inst/extdata/signatures/",sig), sep = "\t", stringsAsFactors = F, header = T)
+#
+# }
 
 bed_files <- list.files("inst/extdata/bed_panels/")
 

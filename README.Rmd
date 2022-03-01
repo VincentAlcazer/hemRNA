@@ -37,7 +37,7 @@ You can install the development version from [GitHub](https://github.com/Vincent
  
 ## Local file install
  
-install.packages("path_to_hemRNA-master.zip", repos = NULL, type="source", force = T)
+install.packages("path_to_hemRNA-master_folder", repos = NULL, type="source", force = T)
  
 
 

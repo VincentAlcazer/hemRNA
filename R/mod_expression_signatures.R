@@ -61,13 +61,13 @@ mod_expression_signatures_server <- function(id, r){
 
     df_filt <- reactive({r$test$df_filt})
 
-    #sig_list <- reactive({r$test$sig_list})
+    sig_list <- reactive({r$test$sig_list})
 
     observe({
       updateSelectInput(
         session,
         "Signatures",
-        choices = c(names(sig_list))
+        choices = c(names(sig_list()))
       )
     })
 
@@ -78,12 +78,12 @@ mod_expression_signatures_server <- function(id, r){
     input$Signatures
       isolate({
 
-        genes_sig <- as.character(unlist(dplyr::select(sig_list[[input$Signatures]], 1)))
+        genes_sig <- as.character(unlist(dplyr::select(sig_list()[[input$Signatures]], 1)))
         genes_xp <- as.character(unlist(dplyr::select(df_filt(), 1)))
 
         intersect_genes <- intersect(genes_sig, genes_xp)
 
-        coefs_df <- sig_list[[input$Signatures]] %>% column_to_rownames("gene_id") %>% as.matrix()
+        coefs_df <- sig_list()[[input$Signatures]] %>% column_to_rownames("gene_id") %>% as.matrix()
 
         coefs <- as.numeric(unlist(coefs_df[intersect_genes,]))
 
@@ -109,7 +109,7 @@ mod_expression_signatures_server <- function(id, r){
       req(df_filt())
       isolate({
 
-        genes_sig <- as.character(unlist(dplyr::select(sig_list[[input$Signatures]], 1)))
+        genes_sig <- as.character(unlist(dplyr::select(sig_list()[[input$Signatures]], 1)))
         genes_xp <- as.character(unlist(dplyr::select(df_filt(), 1)))
 
         missing_genes <- setdiff(genes_sig, genes_xp)
