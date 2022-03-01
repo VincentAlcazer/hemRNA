@@ -17,18 +17,18 @@ app_server <- function( input, output, session ) {
   ##### ===== Full results folder
 
   # ## For volumes parse
-  # volumes <- getVolumes()
-  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(volumes, input$folder_path)))
-  # })
+  volumes <- getVolumes()
+  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  folder_path <- reactive({
+    return(print(parseDirPath(volumes, input$folder_path)))
+  })
 
   # Parse local folder
-  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-
-  folder_path <- reactive({
-    return(print(parseDirPath(c(root='../'), input$folder_path)))
-  })
+  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+  #
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
+  # })
 
   ##### ===== Individual folders
 
@@ -368,7 +368,6 @@ app_server <- function( input, output, session ) {
   observe({
    r$test$df_filt <- df_filt()
   })
-
 
 
   observe({
