@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.5.1"
+        title = "hemRNA v0.6"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################
@@ -27,14 +27,13 @@ app_ui <- function(request) {
           menuItem("Home", tabName = "home", icon = icon("play-circle")),
           menuItem("Data loading", tabName = "data", icon = icon("spinner")),
           menuItem("Expression", tabName = "expression", icon = icon("poll")),
+          menuItem("RNAmut", tabName = "RNAmut", icon = icon("bezier-curve")),
+
           menuItem("Fusion", tabName = "fusion", icon = icon("exchange-alt"),
                    menuSubItem("Arriba", tabName = "arriba"),
                    menuSubItem("NF-Core", tabName = "nfcore")
                    ),
-          menuItem("Variants", tabName = "variants",icon = icon("bezier-curve"),
-                   menuSubItem("Hotspot", tabName = "hotspot"),
-                   menuSubItem("Variant calling", tabName = "variant")
-                   ),
+          menuItem("HotSpot variants", tabName = "hotspot",icon = icon("fire")),
           menuItem("CNV", tabName = "CNV", icon = icon("copy"))
 
           )
@@ -53,10 +52,11 @@ app_ui <- function(request) {
           ##### ===== Data loading
 
           tabItem("data",
-                  tabsetPanel(
-                    id = "data", type = "tabs",
-                    tabPanel("Full results loading",
                              fluidPage(
+                               h1("Data loading"),
+                               p("hemRNA has been optimized to run with the output of its corresponding",
+                                 a("RNA-seq bash pipeline.", href = "https://github.com/VincentAlcazer/hemRNA")),
+
                                box(title = "Folder", width = 6,
                                    ### === Load results folder
                                    HTML("<b>Select results folder</b></br>"),
@@ -68,7 +68,9 @@ app_ui <- function(request) {
                                                choices = c("None"),
                                                selected = "None"),
                                    div(style = "margin-top: -20px"),
-                                   p("Panel should be added to the data/bed_panels folder as bed files."),
+                                   p("Panels should be added to the extda/bed_panels folder as bed files to
+                                     be loaded directly (the first file in alphabetical order will be
+                                     loaded as default)."),
 
                                    div(style = "margin-top: 20px"),
 
@@ -80,7 +82,10 @@ app_ui <- function(request) {
 
                                    htmlOutput("arriba_check"),
                                    htmlOutput("fusion_catcher_check"),
+
                                    htmlOutput("hotspot_check"),
+                                   htmlOutput("RNAmut_check"),
+
                                    htmlOutput("cnv_check")
 
                                     # p("Preview"),
@@ -89,7 +94,7 @@ app_ui <- function(request) {
 
                                ),# box
                                box(title = "Meta", width = 6,
-                                   p("/!\ La première colonne doit correspondre à la clé d'identification des échantillons/patients."),
+                                   p("/!\ First column should correspond to samples / patients ID"),
                                    fileInput("meta",
                                              label = ("Meta"),
                                              accept = c(
@@ -132,74 +137,19 @@ app_ui <- function(request) {
 
 
                              ) # fluid page
-
-                    ),# tabPanel
-
-                    tabPanel("Individual loading",
-                             fluidPage(
-                               box(title = "Data", width = 6,
-                                   HTML("<b>Select salmon folder</b></br>"),
-                                   shinyDirButton('df_indiv_xp', label='Browse...', title='Please select a folder'),
-                                   div(style = "margin-top: 20px"),
-                                   fileInput("panel_indiv_xp", label = "Upload used panel (optional)"),
-                                   div(style = "margin-top: -20px"),
-                                   p("Panel should be uploaded as a  simple .txt file
-                                     with a gene_id column corresponding to gene names"),
-
-
-                                   p("Preview"),
-                                   shinycssloaders::withSpinner(DT::DTOutput("preview_indiv_data"),type = 6)
-
-                               ),# box
-                              box(title = "Meta", width = 6,
-                                  p("/!\ La première colonne doit correspondre à la clé d'identification des échantillons/patients."),
-                                    fileInput("meta_indiv",
-                                              label = ("Meta"),
-                                              accept = c(
-                                                "text/tab-separated-values",
-                                                "text/comma-separated-values",
-                                                "text/plain",
-                                                "text/csv",
-                                                ".csv",
-                                                ".tsv",
-                                                ".xls",
-                                                ".xlsx"
-                                              )
-                                    ),
-                                    div(style = "margin-top: -20px"),
-                                    radioButtons("sep_indiv", "Separator",
-                                                 choices = c(
-                                                   "comma-delim (.csv1)" = ",",
-                                                   "semi colon-delim (.csv2)" = ";",
-                                                   "tab-delim (.tsv/.txt)" = "\t",
-                                                   "Excel (.xls/.xlsx)" = "xl"
-                                                 ),
-                                                 selected = "\t"
-                                    ),
-                                    div(style = "margin-top: -20px"),
-                                    radioButtons("dec_indiv", "Decimal",
-                                                 choices = c(
-                                                   "Comma (,)" = ",",
-                                                   "Period (.)" = "."
-                                                 ),
-                                                 selected = ","
-                                    ),
-                                  p("Preview"),
-                                  shinycssloaders::withSpinner(DT::DTOutput("preview_indiv_meta"),type = 6)
-                              ) #box
-
-
-                             ) # fluid page
-
-                    )# tabPanel
-                  )# tabSetPanel
                   ), # Tab Item
 
           ##### ===== Expression
 
           tabItem("expression",
+                  h1("Expression"),
+                  HTML("<b>Methods:</b> TPM (transcripts per million) are quantified using Salmon and log-normalized (Log2 TPM+1).<br>
+                (NB: TPM is a normalization accouting for both sequencing depth and transcripts size.
+                When you use TPM, the sum of all TPMs in each sample are the same.
+                This makes it easier to compare the proportion of reads that mapped to a gene in each sample.)"),
                   tabsetPanel(
                     id = "expression", type = "tabs",
+
                     tabPanel("PCA",  mod_expression_ui("expression_ui_1")),
                     tabPanel("Individual xp",mod_expression_individual_ui("expression_individual_ui_1")),
                     tabPanel("Signatures", mod_expression_signatures_ui("expression_signatures_ui_1")),
@@ -209,6 +159,8 @@ app_ui <- function(request) {
                   )#TabSetPanel
 
         ), #tabItem
+        tabItem("RNAmut", mod_RNAmut_ui("RNAmut_ui_1")),
+
         tabItem("arriba", mod_fusion_ui("fusion_ui_1")),
         tabItem("nfcore",
                 h1("NF-Core"),
@@ -222,32 +174,8 @@ app_ui <- function(request) {
 
         tabItem("hotspot",mod_hotspot_ui("hotspot_ui_1")),
 
-        tabItem("variant",
-                h1("Variant calling"),
-                HTML("Methods: bam were generated according to the GATK good practice pipeline,
-                including: <br/>
-                - Fastq reads alignement against hg19 reference genome with 1000 genome decoy using STAR (gencode v19 annotation) <br/>
-                - Bam processing with markduplicates, SplitNCigarReads and baserecalibration (BQSR) <br/>
-                BQSR corrected BAM were then processed with 3 different caller: <br/>
-               - GATK HaplotypeCaller with default parameters and -dont-use-soft-clipped-bases -dbsnp parameters with the dbsnp138 reference.
-               Basic filter was then appllied (--window 35, --cluster 3, FS > 30, QD < 2) <br/>
-               - Freebayes with default parameters and --use-duplicate-reads --standard-filters <br/>
-               - Samtools mpileup with -Q 30
-            "),
-
-
-                tabsetPanel(
-                  id = "variant_sub", type = "tabs",
-                  # tabPanel("Overall",
-                  #          mod_variant_ui("variant_ui_1")
-                  # ),#tabsetpanel
-                  tabPanel("GATK",
-                           mod_variant_GATK_ui("variant_GATK_ui_1")
-                           )
-                )##tabsetpanel
-        ),
-
-        tabItem("CNV",mod_CNV_ui("CNV_ui_1"))
+        tabItem("CNV",
+                mod_CNV_ui("CNV_ui_1"))
 
         )#tabItems
       ) #body

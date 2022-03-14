@@ -1,4 +1,4 @@
-#' hotspot UI Function
+#' RNAmut UI Function
 #'
 #' @description A shiny Module.
 #'
@@ -7,25 +7,26 @@
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
-mod_hotspot_ui <- function(id){
+mod_RNAmut_ui <- function(id){
   ns <- NS(id)
   tagList(
+
     fluidPage(
-      h1("Hotspot"),
-      p("Methods: For each  unique mutations, the overall raw counts
-        or the normalized count (total raw count / total Depth) is represented."),
+      h1("RNAmut"),
+      p("Methods: RNAmut pipeline (Gu M. et al. Haematologica 2020).
+        /!\\ Fusions VAF are provided as estimations only! (n mutated reads / total gene 1+2 WT reads)"),
 
       tabsetPanel(
-        id = "hotspot", type = "tabs",
-        tabPanel("Overall graph",
+        id = "RNAmut", type = "tabs",
+        tabPanel("Graph",
 
-                 column(8, shinycssloaders::withSpinner(plotOutput(ns("tileplot"),height = 800),type=6)
+                 column(8, shinycssloaders::withSpinner(plotOutput(ns("tileplot"), height = 800),type=6)
                  ),
                  column(1)
 
 
         ),#tabsetpanel
-        tabPanel("Result table",
+        tabPanel("Results table",
                  column(8,
                         downloadButton(ns("download_table"), "Download table (.tsv)"),
                         shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
@@ -39,11 +40,14 @@ mod_hotspot_ui <- function(id){
                width = 200, right = 20, draggable = T,
                style = "opacity: 0.85",
                wellPanel(
-                 radioButtons(ns("count_type"),
-                              label = c("Count"),
-                              choices = c("Raw counts"="overall_count",
-                                          "Norm. counts (VAF)"="overall_percent"),
-                              selected = "overall_percent"),
+                 checkboxGroupInput(ns("impact"),
+                               label = c("Mutation impact"),
+                               choices = c("Oncogenic",
+                                           "Neutral",
+                                           "Sequencing_artefact"
+                                           ),
+                               selected = "Oncogenic"
+                               ),
                  sliderInput(ns("vaf"), label = "VAF ranges",
                              min = 0, max = 1, value = c(0,1), step= 0.01),
                  sliderInput(ns("y_size"), label = "y-axis font size",
@@ -67,40 +71,31 @@ mod_hotspot_ui <- function(id){
       ) # Column
 
     ) # Fluidpage
+
   )
 }
 
-#' hotspot Server Functions
+#' RNAmut Server Functions
 #'
 #' @noRd
-mod_hotspot_server <- function(id, r){
+mod_RNAmut_server <- function(id, r){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    df_hotspot <- reactive({r$test$df_hotspot})
 
-    # df_stat <- reactive({
-    #
-    #   req(df_hotspot())
-    #
-    #   df_stat <- df_hotspot() %>%
-    #     group_by(sample_id, gene_name) %>%
-    #     summarise(tot_raw_count = sum(overall_count, na.rm = T),
-    #               tot_percent = sum(overall_percent, na.rm = T))
-    #
-    #   return(df_stat)
-    #
-    # })
+    df_RNAmut <- reactive({r$test$df_RNAmut})
 
     plot <- reactive({
 
-      req(df_hotspot())
+      req(df_RNAmut())
 
-      plot <- df_hotspot() %>%
-        filter(overall_percent>input$vaf[1] & overall_percent<=input$vaf[2]) %>%
-        ggplot(aes_string(x="sample_id", y = "gene_mut", fill = input$count_type)) +
-        geom_tile(aes(y=forcats::fct_rev(gene_mut)),color = "white", size = 0.25) +
-        labs(x="", y="", fill = "Cum. VAF")
+      plot <- df_RNAmut() %>%
+        filter(Info %in% input$impact) %>%
+        filter(VAF2 >= input$vaf[1] & VAF2 <=input$vaf[2]) %>%
+        ggplot(aes(x=sample_id, y = forcats::fct_rev(forcats::fct_reorder(gene_mut,as.numeric(type))), fill = VAF2)) +
+        geom_tile(color = "white", size = 0.25) +
+        labs(x="", y="", fill = "VAF")   +
+        facet_grid(type~.,  space="free", scales = "free_y", switch = "y")
 
       return(plot)
 
@@ -111,6 +106,7 @@ mod_hotspot_server <- function(id, r){
         default_theme +
         scale_fill_viridis_c() +
         theme( legend.position = input$legend_ext,
+               strip.text.y = element_text(size = 14, face = "bold"),
                axis.text.y = element_text(size = input$y_size),
                axis.text.x = element_text(size = input$x_size, angle=90, vjust = 0.5, hjust = 1))
     })
@@ -118,9 +114,10 @@ mod_hotspot_server <- function(id, r){
 
     output$result_table <- DT::renderDT(
 
-      df_hotspot() %>%
-        filter(overall_percent>input$vaf[1] & overall_percent<=input$vaf[2]) %>%
-         arrange(desc(overall_percent)), # data
+      df_RNAmut() %>%
+        filter(Info %in% input$impact) %>%
+        filter(VAF2 >= input$vaf[1] & VAF2 <=input$vaf[2]) %>%
+        arrange(desc(VAF2)), # data
       class = "display nowrap compact", # style
       filter = "top", # location of column filters
       server = T,
@@ -135,10 +132,12 @@ mod_hotspot_server <- function(id, r){
 
     output$download_table <- downloadHandler(
       filename = function() {
-        paste("Hotspot.tsv")
+        paste("RNA_mut.tsv")
       },
       content = function(file) {
-        write.table(df_hotspot() %>% arrange(desc(norm_count)), file, row.names = FALSE, sep = "\t", quote = F)
+        write.table(df_RNAmut() %>%
+                      filter(Info %in% input$impact) %>%
+                      filter(VAF2 >= input$vaf[1] & VAF2 <=input$vaf[2]), file, row.names = FALSE, sep = "\t", quote = F)
       }
     )
 
@@ -147,7 +146,7 @@ mod_hotspot_server <- function(id, r){
 }
 
 ## To be copied in the UI
-# mod_hotspot_ui("hotspot_ui_1")
+# mod_RNAmut_ui("RNAmut_ui_1")
 
 ## To be copied in the server
-# mod_hotspot_server("hotspot_ui_1")
+# mod_RNAmut_server("RNAmut_ui_1")

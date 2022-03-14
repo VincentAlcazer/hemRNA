@@ -51,6 +51,7 @@ golem::add_module( name = "star_fusion" )
 golem::add_module( name = "variant" )
 golem::add_module( name = "variant_GATK" )
 golem::add_module( name = "hotspot" )
+golem::add_module( name = "RNAmut" )
 
 golem::add_module( name = "CNV" )
 

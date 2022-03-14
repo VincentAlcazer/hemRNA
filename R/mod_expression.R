@@ -12,8 +12,7 @@ mod_expression_ui <- function(id){
   tagList(
 
     fluidPage(
-      h1("PCA on top variable genes"),
-      p("ACP réalisée sur les gènes les plus variables à partir des log2(TPM+1) de Salmon."),
+      br(),
       column(8,
              shinycssloaders::withSpinner(plotOutput(ns("pca")),type=6)
              ),

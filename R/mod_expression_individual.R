@@ -12,27 +12,24 @@ mod_expression_individual_ui <- function(id){
   tagList(
     tabsetPanel(
       id = "xp_indiv", type = "tabs",
-      tabPanel("Overall graph (TPM)",
-              h1("Scatter/Boxplot of selected genes"),
-              p("TPM (transcripts per million) were calculated using Salmon and log-normalized.
-                (NB: TPM is a normalization accouting for both sequencing depth and transcripts size.
-                When you use TPM, the sum of all TPMs in each sample are the same.
-                This makes it easier to compare the proportion of reads that mapped to a gene in each sample.)"),
+      tabPanel("Graph (TPM)",
+               br(),
               column(8,
                      shinycssloaders::withSpinner(plotOutput(ns("scatterplot")),type=6)
 
               ),
               column(1)
       ),#tabsetpanel
-    tabPanel("Result table (TPM)",
+    tabPanel("Results table (TPM)",
+             br(),
              column(8,
-                    downloadButton(ns("download_table"), "Download table (.tsv)"),
+                    downloadButton(ns("download_table"), "Download table (selected genes) (.tsv)"),
+                    downloadButton(ns("download_table_all"), "Download full table (all genes) (.tsv)"),
                     shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
              ),
              column(1)
     ),
     tabPanel("Graph (ratio)",
-             h1("Scatter/Boxplot of selected genes"),
              p("The mean log-normalized TPM value of the selected control genes is calculated as a control factor.
                  The ratio of the log-normalized TPM value of the selected genes against the control factor
                  is then represented."),
@@ -52,7 +49,7 @@ mod_expression_individual_ui <- function(id){
              ),
              column(1)
     ),#tabsetpanel
-    tabPanel("Result table (ratio)",
+    tabPanel("Results table (ratio)",
              column(8,
                     downloadButton(ns("download_table_ratio"), "Download table (.tsv)"),
                     shinycssloaders::withSpinner(DT::DTOutput(ns("result_table_ratio")),type=6)
@@ -186,6 +183,15 @@ mod_expression_individual_server <- function(id, r){
         },
         content = function(file) {
           write.table(plot_df(), file, row.names = FALSE, sep = "\t", quote = F)
+        }
+      )
+
+      output$download_table_all <- downloadHandler(
+        filename = function() {
+          paste("TPM_all.tsv")
+        },
+        content = function(file) {
+          write.table(df_filt(), file, row.names = FALSE, sep = "\t", quote = F)
         }
       )
 

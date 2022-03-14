@@ -9,6 +9,7 @@
 #' @import ggrepel
 #' @import viridis
 #' @import tidyr
+#' @importFrom data.table fread
 #'
 #'
 
@@ -30,17 +31,17 @@ gene_anno <- read.delim("data/gencode_v38_gene_names.tsv")
 #
 # }
 
-bed_files <- list.files("inst/extdata/bed_panels/")
-
-bed_list <- list()
-for(bed in bed_files){
-
-  name <- gsub(".bed$","",bed)
-
-  bed_list[[name]] <- read.table(paste0("inst/extdata/bed_panels/",bed), sep = "\t", stringsAsFactors = F, header = F)
-  colnames(bed_list[[name]])[1:4] <- c("chr","start","end","gene_name")
-
-}
+# bed_files <- list.files("inst/extdata/bed_panels/")
+#
+# bed_list <- list()
+# for(bed in bed_files){
+#
+#   name <- gsub(".bed$","",bed)
+#
+#   bed_list[[name]] <- read.table(paste0("inst/extdata/bed_panels/",bed), sep = "\t", stringsAsFactors = F, header = F)
+#   colnames(bed_list[[name]])[1:4] <- c("chr","start","end","gene_name")
+#
+# }
 
 
 hg19_cytoband <- read.table("data/UCSC_hg19_cytoBand.txt.gz",
