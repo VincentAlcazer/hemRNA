@@ -17,18 +17,18 @@ app_server <- function( input, output, session ) {
   ##### ===== Full results folder
 
   # ## For volumes parse
-  # volumes <- getVolumes()
-  # shinyDirChoose(input, 'folder_path', root=volumes, session=session)
-  # folder_path <- reactive({
-  #   return(print(parseDirPath(volumes, input$folder_path)))
-  # })
+  volumes <- getVolumes()
+  shinyDirChoose(input, 'folder_path', root=volumes, session=session)
+  folder_path <- reactive({
+    return(print(parseDirPath(volumes, input$folder_path)))
+  })
 
   # Parse local folder
-  shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
-
-  folder_path <- reactive({
-    return(print(parseDirPath(c(root='../'), input$folder_path)))
-  })
+  # shinyDirChoose(input, 'folder_path', root=c(root='../'), session=session)
+  #
+  # folder_path <- reactive({
+  #   return(print(parseDirPath(c(root='../'), input$folder_path)))
+  # })
 
   ##### ===== Signatures list
 
@@ -356,7 +356,6 @@ app_server <- function( input, output, session ) {
                VAF2 = if_else(type == "Variant", VAF, MutReads / tot_reads))
 
       return(dat)
-      message("RNAmut files successfully imported")
 
     }
 
@@ -369,10 +368,11 @@ app_server <- function( input, output, session ) {
   cnvkit_list <- reactive({
 
     req(folder_path())
+    message("===== Importing CNVkit files...")
     files <- list.files(paste0(folder_path(),"/cnvkit"), pattern = "_featurecount_genelevel_ENSID.cnr", recursive = T, full.names = T)
 
     if(length(files)==0 | is.null(files)){
-      message("No cnvkit file detected")
+      message("No cnvkit files detected")
     } else {
 
       names(files) <- gsub("_featurecount_genelevel_ENSID.cnr","",
@@ -421,35 +421,6 @@ app_server <- function( input, output, session ) {
 
 
   })
-
-
-  ### === Featurecount
-
-  ftcount <- reactive({
-    req(folder_path())
-
-    files <- list.files(paste0(folder_path(),"/featurecount"), pattern = "featurecount.cnt$", recursive = T, full.names = T)
-
-    if(length(files)==0 | is.null(files)){
-      message("No ftcount expression file detected")
-    } else {
-
-      dat <- read.delim(paste0(folder_path(),"/featurecount/featurecount.cnt"), skip=1, stringsAsFactors = F)
-      colnames(dat) <- gsub("X.*.bam.(.*.)_hg19_BQSR.bam$","\\1",colnames(dat))
-
-      TPM <- tpm_approx( dat[,7:ncol(dat)], dat$Length)
-      colnames(TPM) <- paste0(colnames(TPM),"_TPM")
-
-      CPM <- cpm_approx( dat[,7:ncol(dat)])
-      colnames(CPM) <- paste0(colnames(CPM),"_CPM")
-
-      dat <- cbind(dat,TPM,CPM)
-
-      return(dat)
-    }
-
-  })
-
 
 
   ##### ===== Meta
@@ -530,9 +501,6 @@ app_server <- function( input, output, session ) {
   })
 
   observe({
-    r$test$ftcount <- ftcount()
-  })
-  observe({
     r$test$cnvkit_list <- cnvkit_list()
   })
 
@@ -603,10 +571,10 @@ app_server <- function( input, output, session ) {
 
   output$cnv_check <- renderText({
     validate(
-      need(r$test$ftcount, "CNV: No ftcount data detected" )
+      need(r$test$cnvkit_list, "CNV: No CNVkit data detected" )
     )
 
-    paste("<font color=\"#21bf88\"><b>CNV: Ftcount data successfully loaded!</b></font>"  )
+    paste("<font color=\"#21bf88\"><b>CNV: CNVkit data successfully loaded!</b></font>"  )
 
   })
 
