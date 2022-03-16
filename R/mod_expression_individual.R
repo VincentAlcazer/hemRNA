@@ -261,7 +261,7 @@ mod_expression_individual_server <- function(id, r){
           paste("TPM_long.tsv")
         },
         content = function(file) {
-          write.table(plot_df(), file, row.names = FALSE, sep = "\t", quote = F)
+          write.table(plot_df_ratio(), file, row.names = FALSE, sep = "\t", quote = F)
         }
       )
 
