@@ -14,6 +14,7 @@ mod_expression_signatures_ui <- function(id){
       h1("Signatures"),
       column(8,
              textOutput(ns("missing_genes")),
+             downloadButton(ns("download_table"), "Download result table (.tsv)"),
              shinycssloaders::withSpinner(plotOutput(ns("barplot")),type=6)
              #shinycssloaders::withSpinner(DT::DTOutput(ns("result_table")),type=6)
       ),
@@ -151,20 +152,14 @@ mod_expression_signatures_server <- function(id, r){
         )
     })
 
-    # output$result_table <- DT::renderDT(
-    #
-    #   df_filt(), # data
-    #   class = "display nowrap compact", # style
-    #   filter = "top", # location of column filters
-    #   server = T,
-    #   rownames = FALSE,
-    #   options = list(
-    #     scrollX = TRUE,
-    #     "pagelength" = 20,
-    #     lengthChange = TRUE,
-    #     columnDefs = list(list(className = "dt-left", targets = "_all"))
-    #   )
-    # )
+    output$download_table <- downloadHandler(
+      filename = function() {
+        paste("Signatures.tsv")
+      },
+      content = function(file) {
+        write.table(sig_df(), file, row.names = FALSE, sep = "\t", quote = F)
+      }
+    )
 
   })
 }
