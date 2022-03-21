@@ -33,6 +33,7 @@ usethis::use_package("forcats")
 usethis::use_package("viridis")
 usethis::use_package("vcfR")
 usethis::use_package("BioCircos")
+usethis::use_package("rmarkdown")
 
 ## Add modules ----
 ## Create a module infrastructure in R/

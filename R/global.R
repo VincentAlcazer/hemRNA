@@ -1,6 +1,9 @@
 
 #' Global parameters
-#'
+
+# library(BiocManager)
+# options(repos = BiocManager::repositories())
+
 #' @import shinyFiles
 #' @import ggplot2
 #' @import dplyr
@@ -11,6 +14,7 @@
 #' @import tidyr
 #' @importFrom data.table fread
 #' @import BioCircos
+#' @import rmarkdown
 #'
 #'
 

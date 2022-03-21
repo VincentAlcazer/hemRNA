@@ -1,0 +1,14 @@
+name: hemRNA
+title: hemRNA
+username:
+account: vincentalcazer
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5900546
+bundleId: 5709557
+url: https://vincentalcazer.shinyapps.io/hemRNA/
+when: 1647881063.51078
+lastSyncTime: 1647881063.51078
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData
