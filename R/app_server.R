@@ -95,7 +95,6 @@ app_server <- function( input, output, session ) {
 
   ##### ===== BED file / panel df
 
-
   sig_list <- reactive({
 
     sig_dir <- system.file("extdata","signatures", package = "hemRNA")
@@ -621,6 +620,9 @@ app_server <- function( input, output, session ) {
 
   mod_home_server("home_ui_1")
   mod_data_server("data_ui_1")
+
+  mod_overview_server("overview_1", r=r)
+
   mod_expression_server("expression_ui_1", r=r)
   mod_expression_deseq_server("expression_deseq_ui_1", r=r)
   mod_expression_individual_server("expression_individual_ui_1", r=r)

@@ -32,12 +32,15 @@ usethis::use_package("ggrepel")
 usethis::use_package("forcats")
 usethis::use_package("viridis")
 usethis::use_package("vcfR")
-
+usethis::use_package("BioCircos")
 
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module( name = "home" ) # Name of the module
 golem::add_module( name = "data" )
+
+golem::add_module( name = "overview" )
+
 golem::add_module( name = "expression" )
 golem::add_module( name = "expression_deseq" )
 golem::add_module( name = "expression_heatmap" )

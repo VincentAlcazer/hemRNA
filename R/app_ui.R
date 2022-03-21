@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.6.1"
+        title = "hemRNA v0.7"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################
@@ -26,6 +26,7 @@ app_ui <- function(request) {
           id = "tabs",
           menuItem("Home", tabName = "home", icon = icon("play-circle")),
           menuItem("Data loading", tabName = "data", icon = icon("spinner")),
+          menuItem("Results overview", tabName = "overview", icon = icon("circle-notch")),
           menuItem("Expression", tabName = "expression", icon = icon("poll")),
           menuItem("RNAmut", tabName = "RNAmut", icon = icon("bezier-curve")),
 
@@ -137,7 +138,13 @@ app_ui <- function(request) {
 
 
                              ) # fluid page
-                  ), # Tab Item
+                  ), #tabItem
+
+          ##### ===== Overview
+
+          tabItem("overview",
+                  mod_overview_ui("overview_1")
+          ),#tabItem
 
           ##### ===== Expression
 

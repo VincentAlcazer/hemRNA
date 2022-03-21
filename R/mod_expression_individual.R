@@ -224,7 +224,7 @@ mod_expression_individual_server <- function(id, r){
         plot <- plot_df_ratio() %>%
           ggplot(aes(x = sample_id, y = ratio, color = gene_name)) +
           geom_boxplot(alpha=0.25, size = 0.75, color = "grey", outlier.shape=NA) +
-          geom_jitter(width = 0.2, size = 3) +
+          geom_point(size = 3) +
           labs(x="", y="Log2 (TPM+1) ratio")
 
         return(plot)

@@ -18,3 +18,255 @@ depth_approx <- function(data){
   CPM = data / colSums(data)
   return(CPM)
 }
+
+
+#' Draw final circle plot
+#'
+
+circos_plot <- function(expression,cnv,variant, arriba, bed,
+                        SNP_max_rad = 1.145, SNP_min_rad =1,
+                        exp_max_rad = 0.97, exp_min_rad = 0.80,
+                        CNV_max_rad = 0.75, CNV_min_rad = 0.4,
+                        fusion_max_rad = 0.35,
+                        CNV_cutoff = 1.5
+                        ){
+
+
+  ########## ========== Global parameters
+
+
+
+  ### Set genes coords
+  gene_order <- gsub("chr","",unique(bed$chr))
+
+  genes_coords <- bed %>%
+    #mutate(chr = factor(chr, levels = unique(bed$chr))) %>%
+    distinct(gene_name, .keep_all = T) %>%
+    group_by(chr) %>%
+    mutate(order = seq(1:n()),
+           chr = factor(gsub("chr","",chr), levels = gene_order))
+
+  ### Set custom genome coords
+  custom_genome <- genes_coords %>%
+    group_by(chr) %>%
+    summarise(length = length(unique(gene_name))) %>%
+    column_to_rownames("chr") %>% t() %>% as.data.frame(check.names = F) %>% as.list()
+
+  ########## ========== Prepare data
+
+  ##### ===== Expression
+
+  salmon_res <- expression %>%
+    #select(gene_name, expression = all_of(input$sample)) %>% # DEV TO REMOVE
+    inner_join(genes_coords, by = "gene_name") %>%
+    arrange(chr)
+
+  ##### ===== CNV
+
+  cnv_res <- cnv %>% left_join(genes_coords, by = c("gene"="gene_name"),
+                                 suffix = c("_cnv","_coords"))
+
+
+  cnv_res_notsig <- cnv_res %>% filter(abs(CNV) < CNV_cutoff)
+  cnv_res_sig <- cnv_res %>% filter(abs(CNV) >= CNV_cutoff)
+
+
+  ##### ===== Mutations
+
+  RNAmut_res <- variant %>% filter(Info == "Oncogenic", type == "Variant") %>%
+    #filter(sample_id == input$sample) %>% # DEV TO REMOVE
+    arrange(desc(VAF2)) %>%
+    distinct(gene_mut, .keep_all = T) %>%
+    left_join(genes_coords, by = c("Gene"="gene_name"))
+
+  ##### ===== Fusions
+
+  fusion_res <- arriba %>% select(-read_identifiers, -fusion_transcript) %>%
+    #filter(sample_id == input$sample) %>% # DEV TO REMOVE
+    filter(confidence == "high") %>%
+    left_join(genes_coords, by = c("gene1"="gene_name")) %>%
+    left_join(genes_coords, by = c("gene2"="gene_name"), suffix = c("_g1","_g2")) %>%
+    na.omit()
+    # separate(breakpoint1, into = c("chr1","linkpos1")) %>%
+    # separate(breakpoint2, into = c("chr2","linkpos2"))
+
+
+
+  ########## ========== Draw tracks
+
+
+  ##### ===== SNP tracks
+
+  if(nrow(RNAmut_res) == 0){
+
+    tracks = BioCircosTextTrack("text1",
+                                         'No variants found',
+                                         weight = "normal",
+                                         x = -0.2, y = -1.07)
+    tracks = tracks + BioCircosTextTrack("text2",
+                                         'by RNAMut',
+                                         weight = "normal",
+                                         x = -0.1, y = -1.02)
+
+  } else {
+
+    tracks =  BioCircosArcTrack("RNAmut_variants",
+                                        chromosome = as.character(RNAmut_res$chr),
+                                        starts = RNAmut_res$order,
+                                        ends = RNAmut_res$order+4,
+                                        labels = RNAmut_res$gene_mut,
+
+                                        maxRadius = SNP_max_rad, minRadius = SNP_min_rad,
+                                        color = "black")
+
+  }
+
+
+  ##### ===== Expression track
+  tracks = tracks + BioCircosHeatmapTrack("heatmap1",
+                                          as.character(salmon_res$chr),
+                                          salmon_res$order-1,
+                                          salmon_res$order,
+                                          round(salmon_res$expression,2),
+                                          labels = salmon_res$gene_name,
+                                          minRadius = exp_min_rad,
+                                          maxRadius = exp_max_rad)
+
+  ##### ===== CNV tracks
+
+  tracks = tracks + BioCircosCNVTrack("cnv_backm2",
+                                      as.character(cnv_res$chromosome),
+                                      cnv_res$order_coords-1,
+                                      cnv_res$order_coords,
+                                      rep(-2,length(as.character(cnv_res$chromosome))),
+                                      color = "black",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_backm1",
+                                      as.character(cnv_res$chromosome),
+                                      cnv_res$order_coords-1,
+                                      cnv_res$order_coords,
+                                      rep(-1,length(as.character(cnv_res$chromosome))),
+                                      color = "lightgrey",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_back0",
+                                      as.character(cnv_res$chromosome),
+                                      cnv_res$order_coords-1,
+                                      cnv_res$order_coords,
+                                      rep(0,length(as.character(cnv_res$chromosome))),
+                                      color = "grey",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_back1",
+                                      as.character(cnv_res$chromosome),
+                                      cnv_res$order_coords-1,
+                                      cnv_res$order_coords,
+                                      rep(1,length(as.character(cnv_res$chromosome))),
+                                      color = "lightgrey",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_back2",
+                                      as.character(cnv_res$chromosome),
+                                      cnv_res$order_coords-1,
+                                      cnv_res$order_coords,
+                                      rep(2,length(as.character(cnv_res$chromosome))),
+                                      color = "black",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_notsig",width = 2,
+                             as.character(cnv_res_notsig$chromosome),
+                             cnv_res_notsig$order_coords-1,
+                             cnv_res_notsig$order_coords,
+                             cnv_res_notsig$CNV,
+                             color = "cornflowerblue",
+                             range = c(-2,2),
+                             minRadius = CNV_min_rad,
+                             maxRadius = CNV_max_rad)
+
+  tracks = tracks + BioCircosCNVTrack("cnv_sig", width = 5,
+                                      as.character(cnv_res_sig$chromosome),
+                                      cnv_res_sig$order_coords-1,
+                                      cnv_res_sig$order_coords,
+                                      cnv_res_sig$CNV,
+                                      color = "firebrick",
+                                      range = c(-2,2),
+                                      minRadius = CNV_min_rad,
+                                      maxRadius = CNV_max_rad)
+
+
+
+
+
+  ##### ===== Fusions track
+
+  if(nrow(fusion_res) == 0){
+
+    tracks = tracks + BioCircosTextTrack("text3",
+                                        'No fusions found',
+                                        weight = "normal",
+                                        x = -0.2, y = 0)
+    tracks = tracks + BioCircosTextTrack("text4",
+                                         'by Arriba',
+                                         weight = "normal",
+                                         x = -0.10, y = 0.1)
+
+  } else {
+
+    tracks = tracks + BioCircosLinkTrack("fusions",
+                                         gene1Chromosomes = as.character(fusion_res$chr_g1),
+                                         gene1Starts = as.numeric(fusion_res$order_g1),
+                                         gene1Ends = as.numeric(fusion_res$order_g1)+4,
+                                         gene2Chromosomes = as.character(fusion_res$chr_g2),
+                                         gene2Starts = as.numeric(fusion_res$order_g2),
+                                         gene2Ends = as.numeric(fusion_res$order_g2)+4,
+                                         labels = fusion_res$fusion,
+                                         displayAxis = F, axisPadding = 6,
+                                         color = "firebrick", width = "0.5em",
+                                         displayLabel = F,
+                                         maxRadius = fusion_max_rad)
+  }
+
+  ##### ===== Backgrounds
+#
+  # tracks = tracks + BioCircosBackgroundTrack("BG_SNP",
+  #                                            borderColors = "black",
+  #                                            fillColor = "white", borderSize = 0.6,
+  #                                            minRadius = CNV_max_rad/2, maxRadius = CNV_max_rad)
+  # tracks = tracks + BioCircosBackgroundTrack("BG_SNP_2",
+  #                                            borderColors = "black",
+  #                                            fillColor = "white", borderSize = 0.6,
+  #                                            minRadius = CNV_min_rad, maxRadius = CNV_max_rad/2)
+  #
+
+
+  ##### ===== Final viz
+  p <- BioCircos(tracks,
+                 genome = custom_genome,
+                 genomeFillColor = "Spectral",
+                 yChr = F,
+                 chrPad = 0,
+                 displayGenomeBorder = F,
+            genomeTicksLen = 3,
+            genomeTicksTextSize = 0,
+            genomeTicksScale = 50000000,
+            genomeLabelTextSize = 18,
+            genomeLabelDy = 0)
+
+  return(p)
+
+
+
+}
+
+

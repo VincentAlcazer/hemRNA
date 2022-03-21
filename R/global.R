@@ -10,6 +10,7 @@
 #' @import viridis
 #' @import tidyr
 #' @importFrom data.table fread
+#' @import BioCircos
 #'
 #'
 

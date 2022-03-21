@@ -22,6 +22,7 @@ mod_home_ui <- function(id){
              h2("Change log"),
 
              HTML("
+            21-03-2022: v0.7 - Results overview module with circos plot <br/>
             09-03-2022: v0.6 - RNAmut integration, CNV module overhaul & major performances improvement <br/>
             01-03-2022: v0.5 - NF-Core module <br/>
             26-02-2022: v0.4.2 - Stability improvement & signatures module fixes <br/>

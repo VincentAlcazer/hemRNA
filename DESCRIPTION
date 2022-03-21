@@ -7,6 +7,7 @@ License: MIT + file LICENSE
 Imports: 
     apeglm,
     attempt,
+    BioCircos,
     config (>= 0.3.1),
     data.table,
     DESeq2,
@@ -27,6 +28,7 @@ Imports:
     shinydashboard,
     shinydashboardPlus,
     shinyFiles,
+    shinyjs,
     tibble,
     tidyr,
     tximport,
