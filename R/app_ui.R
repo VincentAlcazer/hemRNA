@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.8"
+        title = "hemRNA v0.81"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################

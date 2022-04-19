@@ -248,6 +248,9 @@ mod_expression_deseq_server <- function(id, r){
           meta_deseq[,input$group] <- factor(meta_deseq[,input$group])
 
           txi_filt <- txi()
+          txi_filt$abundance <- txi_filt$abundance[,intersect]
+          txi_filt$counts <- txi_filt$counts[,intersect]
+          txi_filt$length <- txi_filt$length[,intersect]
 
           if(length(intersect) < 2){
             message("<2 common patients found: check meta")
@@ -259,7 +262,7 @@ mod_expression_deseq_server <- function(id, r){
             design <- as.formula(paste0("~",paste(input$covariates, collapse = "+")," + ",paste0(input$group)))
           }
 
-          dds <- DESeq2::DESeqDataSetFromTximport(txi(), meta_deseq, design =  design)
+          dds <- DESeq2::DESeqDataSetFromTximport(txi_filt, meta_deseq, design =  design)
 
           dds <- DESeq2::DESeq(dds)
 
