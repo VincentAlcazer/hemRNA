@@ -16,6 +16,7 @@
 #' @import BioCircos
 #' @import rmarkdown
 #' @import ComplexHeatmap
+#' @import grid
 #'
 
 #library(ggplot2)

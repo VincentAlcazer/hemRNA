@@ -540,7 +540,7 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
   }
 
 
-  ht <-   Heatmap(t(matrix),
+  ht <-   ComplexHeatmap::Heatmap(t(matrix),
                   name = "heat",
                   col = heat_col,
                   show_column_names = col_names,

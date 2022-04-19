@@ -36,6 +36,7 @@ usethis::use_package("BioCircos")
 usethis::use_package("rmarkdown")
 usethis::use_package("BiocManager")
 usethis::use_package("ComplexHeatmap")
+usethis::use_package("grid")
 
 
 ## Add modules ----
