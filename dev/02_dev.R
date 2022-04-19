@@ -34,6 +34,9 @@ usethis::use_package("viridis")
 usethis::use_package("vcfR")
 usethis::use_package("BioCircos")
 usethis::use_package("rmarkdown")
+usethis::use_package("BiocManager")
+usethis::use_package("ComplexHeatmap")
+
 
 ## Add modules ----
 ## Create a module infrastructure in R/

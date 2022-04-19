@@ -1,7 +1,7 @@
 
 #' Global parameters
 
-# library(BiocManager)
+#  library(BiocManager)
 # options(repos = BiocManager::repositories())
 
 #' @import shinyFiles
@@ -15,7 +15,7 @@
 #' @importFrom data.table fread
 #' @import BioCircos
 #' @import rmarkdown
-#'
+#' @import ComplexHeatmap
 #'
 
 #library(ggplot2)

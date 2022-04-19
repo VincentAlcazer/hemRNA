@@ -2,6 +2,7 @@
 
 export(run_app)
 import(BioCircos)
+import(ComplexHeatmap)
 import(DESeq2)
 import(dplyr)
 import(ggplot2)

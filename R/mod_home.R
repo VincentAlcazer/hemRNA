@@ -22,6 +22,7 @@ mod_home_ui <- function(id){
              h2("Change log"),
 
              HTML("
+            10-04-2022: v0.8 - Complete DESEQ2 module with heatmap & volcano <br/>
             21-03-2022: v0.7 - Results overview module with circos plot <br/>
             09-03-2022: v0.6 - RNAmut integration, CNV module overhaul & major performances improvement <br/>
             01-03-2022: v0.5 - NF-Core module <br/>
