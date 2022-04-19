@@ -484,22 +484,22 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
     matrix <- scale(matrix)
   }
 
-  if(show_pearson == T){
-
-    matrix <- Hmisc::rcorr(t(matrix), type = "pearson")$r
-
-    # sup_leg$legend_1 <- Legend(col_fun = heat_col,
-    #                            title = "Pearson's R",
-    #                            labels_gp = gpar(fontsize = 12),
-    #                            direction = c("horizontal"),
-    #                            title_gp = gpar(fontsize = 12, fontface="bold"))
-
-    message("Max R: ",round(max(matrix[matrix < 1]),2),
-            " - Min R: ", round(min(matrix[matrix > -1]),2))
-
-
-
-  }
+  # if(show_pearson == T){
+  #
+  #   matrix <- Hmisc::rcorr(t(matrix), type = "pearson")$r
+  #
+  #   # sup_leg$legend_1 <- Legend(col_fun = heat_col,
+  #   #                            title = "Pearson's R",
+  #   #                            labels_gp = gpar(fontsize = 12),
+  #   #                            direction = c("horizontal"),
+  #   #                            title_gp = gpar(fontsize = 12, fontface="bold"))
+  #
+  #   message("Max R: ",round(max(matrix[matrix < 1]),2),
+  #           " - Min R: ", round(min(matrix[matrix > -1]),2))
+  #
+  #
+  #
+  # }
 
 
   ##### ===== Show Hclust n

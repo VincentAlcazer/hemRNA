@@ -17,6 +17,7 @@
 #' @import rmarkdown
 #' @import ComplexHeatmap
 #' @import grid
+#' @import circlize
 #'
 
 #library(ggplot2)
