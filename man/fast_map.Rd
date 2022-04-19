@@ -10,7 +10,8 @@ fast_map(
   df,
   top_features_p = 1,
   center_scale = T,
-  heat_colors = "ATAC",
+  heat_colors = colorRampPalette(c("#3361A5", "#248AF3", "#14B3FF", "#88CEEF",
+    "#C1D5DC", "#EAD397", "#FDB31A", "#E42A2A", "#A31D1D"))(100),
   anno_pal = viridis_pal(),
   Zlim = 3,
   method = "ward.D2",
@@ -30,9 +31,7 @@ fast_map(
   row_names = T,
   col_names = T,
   row_fontsize = 12,
-  col_fontsize = 12,
-  show_hclust_n = 0,
-  show_pearson = F
+  col_fontsize = 12
 )
 }
 \description{

@@ -279,7 +279,8 @@ circos_plot <- function(expression,cnv,variant, arriba, bed,
 
 
 fast_map <- function(df, top_features_p = 1, center_scale = T,
-                     heat_colors="ATAC",
+                     heat_colors=colorRampPalette(c('#3361A5','#248AF3','#14B3FF','#88CEEF','#C1D5DC',
+                                                    '#EAD397','#FDB31A','#E42A2A','#A31D1D'))(100),
                      anno_pal = viridis_pal(),
                      Zlim = 3, method = "ward.D2", metric = "euclidean", title = "title",
                      Data_input = "Z-score expression",
@@ -288,26 +289,15 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
                      cluster_rows = T, cluster_cols = T,
                      reorder_rows = T, reorder_cols = T,
                      row_names = T,col_names=T,
-                     row_fontsize = 12, col_fontsize = 12,
-                     show_hclust_n = 0, show_pearson = F ){
+                     row_fontsize = 12, col_fontsize = 12){
 
-  if(heat_colors == "Hiroshige"){
-    heat_colors=rev(colorRampPalette(MetBrewer::MetPalettes$Hiroshige[[1]])(100))
-  } else if(heat_colors == "ATAC"){
-    heat_colors=colorRampPalette(c('#3361A5','#248AF3','#14B3FF','#88CEEF','#C1D5DC',
-                                   '#EAD397','#FDB31A','#E42A2A','#A31D1D'))(100)
-  }
 
-  if(show_pearson == T){
 
-    Data_input = "Pearson's R"
-    heat_col <- circlize::colorRamp2(seq(-1, 1, by =2/99),heat_colors)
+#### Parameters
 
-  } else {
+  message("Parameters")
+  heat_col <- circlize::colorRamp2(seq(-Zlim, +Zlim, by =(2*Zlim)/99),heat_colors)
 
-    heat_col <- circlize::colorRamp2(seq(-Zlim, +Zlim, by =(2*Zlim)/99),heat_colors)
-
-  }
 
   sup_leg = list(legend_1 = Legend(col_fun = heat_col,
                                    title = Data_input,
@@ -317,12 +307,12 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
   )
 
 
-
+  message("Anno if ")
   if(is.null(anno_1)){
 
     sup_ha = NULL
 
-  } else if(is.null(anno_2)){
+  } else {
 
     if(is.numeric(anno_1) | is.double(anno_1)){
 
@@ -378,104 +368,11 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
 
 
 
-  } else {
-
-    ##### ===== 2 annotations
-
-    ### CHeck if anno 1 is num
-    if(is.numeric(anno_1) | is.double(anno_1)){
-
-      ha_1 = circlize::colorRamp2(c(min(anno_1, na.rm=T),
-                                    median(anno_1,na.rm=T),
-                                    max(anno_1,na.rm=T)),
-                                  c(anno_pal(100)[1],
-                                    anno_pal(100)[50],
-                                    anno_pal(100)[100]))
-
-      sup_leg$legend_2 = Legend(col_fun = ha_1,
-                                title=anno_1_name,
-                                direction = c("horizontal"), ncol=2,
-                                labels_gp = gpar(fontsize = 12),
-                                title_gp = gpar(fontsize = 12, fontface="bold"))
-
-    } else {
-
-      if(is.null(anno_1_cols)){
-        ha_1 <- anno_pal(length(unique(na.omit(anno_1))))
-      } else {
-        ha_1 <- anno_1_cols
-      }
-
-
-      names(ha_1) <- unique(na.omit(anno_1))
-
-      sup_leg$legend_2 = Legend(labels=names(ha_1),
-                                title=anno_1_name,
-                                direction = c("horizontal"), ncol=2,
-                                labels_gp = gpar(fontsize = 12),
-                                title_gp = gpar(fontsize = 12, fontface="bold"),
-                                legend_gp = gpar(fill = as.vector(ha_1)))
-
-
-    }
-
-    ### CHeck if anno 2 is num
-
-    if(is.numeric(anno_2) | is.double(anno_2)){
-
-      ha_2 = circlize::colorRamp2(c(min(anno_2, na.rm=T),
-                                    median(anno_2,na.rm=T),
-                                    max(anno_2,na.rm=T)),
-                                  c(anno_pal(100)[1],
-                                    anno_pal(100)[50],
-                                    anno_pal(100)[100]))
-
-
-      sup_leg$legend_3 = Legend(col_fun = ha_2,
-                                title=anno_2_name,
-                                direction = c("horizontal"), ncol=2,
-                                labels_gp = gpar(fontsize = 12),
-                                title_gp = gpar(fontsize = 12, fontface="bold"))
-
-
-
-    } else {
-
-      if(is.null(anno_2_cols)){
-        ha_2 <- RColorBrewer::brewer.pal(length(unique(na.omit(anno_2))), "Dark2")[1:length(unique(na.omit(anno_2)))]
-      } else {
-        ha_2 <- anno_2_cols
-      }
-
-      names(ha_2) <- unique(na.omit(anno_2))
-
-      sup_leg$legend_3 = Legend(labels=names(ha_2),
-                                title=anno_2_name,
-                                direction = c("horizontal"), ncol=2,
-                                labels_gp = gpar(fontsize = 12),
-                                title_gp = gpar(fontsize = 12, fontface="bold"),
-                                legend_gp = gpar(fill = as.vector(ha_2)))
-
-
-
-    }
-
-    sup_ha =  HeatmapAnnotation(supha_1 = anno_1,
-                                supha_2 = anno_2,
-                                show_annotation_name = F,
-                                col = list(supha_1 = ha_1,
-                                           supha_2 = ha_2),
-                                show_legend = F)
-
-
-
-
-
-
   }
 
-
   ##### ===== Prepare df
+
+  message("Prepare df ")
 
   matrix <- df
   matrix <- matrix[,order(apply(matrix, 2, var), decreasing = T)[1:round(top_features_p*ncol(matrix))]]
@@ -484,62 +381,8 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
     matrix <- scale(matrix)
   }
 
-  # if(show_pearson == T){
-  #
-  #   matrix <- Hmisc::rcorr(t(matrix), type = "pearson")$r
-  #
-  #   # sup_leg$legend_1 <- Legend(col_fun = heat_col,
-  #   #                            title = "Pearson's R",
-  #   #                            labels_gp = gpar(fontsize = 12),
-  #   #                            direction = c("horizontal"),
-  #   #                            title_gp = gpar(fontsize = 12, fontface="bold"))
-  #
-  #   message("Max R: ",round(max(matrix[matrix < 1]),2),
-  #           " - Min R: ", round(min(matrix[matrix > -1]),2))
-  #
-  #
-  #
-  # }
 
-
-  ##### ===== Show Hclust n
-
-  if(show_hclust_n > 0){
-
-    model <- factoextra::eclust(matrix, "hclust", k = show_hclust_n, hc_metric = metric,
-                                stand = FALSE, hc_method = method, graph = FALSE)
-
-    if(show_hclust_n == 2){
-      clusters <- RColorBrewer::brewer.pal(3, "Set1")[c(1,3)]
-    } else {
-      clusters <- RColorBrewer::brewer.pal(length(unique(model$cluster)), "Set1")
-    }
-
-    names(clusters) <- unique(model$cluster)
-
-    bot_ha =  HeatmapAnnotation(botha1 = model$cluster,
-                                show_annotation_name = F,
-                                col = list(botha1 = clusters),
-                                show_legend = F,
-                                gp = gpar(fontsize = 12))
-
-    bot_leg = Legend(
-      labels =  names(clusters),
-      title = "Clusters",
-      direction = c("vertical"), ncol = 2,
-      labels_gp = gpar(fontsize = 12),
-      title_gp = gpar(fontsize = 12, fontface="bold"),
-      legend_gp = gpar(fill = as.vector(clusters))
-    )
-
-
-  } else {
-
-    bot_ha = NULL
-    bot_leg = NULL
-  }
-
-
+  message("Plot heatmap ")
   ht <-   ComplexHeatmap::Heatmap(t(matrix),
                   name = "heat",
                   col = heat_col,
@@ -563,7 +406,6 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
                   raster_device = c("png"),
                   raster_quality = 2,
                   top_annotation = sup_ha,
-                  bottom_annotation = bot_ha,
                   column_title = title,
                   column_title_gp = gpar(fontsize = 14, fontface = "bold"),
                   row_title_gp = gpar(fontsize = 12),
@@ -572,8 +414,8 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
                   column_names_gp = gpar(fontsize = col_fontsize)
                   )
 
-
-  draw(ht,annotation_legend_list = c(sup_leg,bot_leg), annotation_legend_side = "bottom", newpage = T)
+### draw
+  draw(ht,annotation_legend_list = sup_leg, annotation_legend_side = "bottom", newpage = T)
 
 
 

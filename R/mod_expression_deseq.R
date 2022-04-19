@@ -396,31 +396,24 @@ mod_expression_deseq_server <- function(id, r){
 
       samples <- intersect(unique(meta()$patient_id),rownames(data_heat))
 
-      message("n_features:",length(samples))
+      message("n_samples:",length(samples))
 
-      message("processing data_heat")
       data_heat <- data_heat[samples,]
 
-      message("processing meta_heat")
-      meta_heat <- meta()
+       meta_heat <- meta()
       rownames(meta_heat) <- meta_heat$patient_id
       meta_heat <- meta_heat[samples,]
 
-
-      message("plot heatmap")
       plot <- fast_map(data_heat,
                        center_scale = T,
-                       heat_colors="ATAC",
                        anno_pal = viridis_pal(),
                        Zlim = 3, method = input$method, metric = input$metric, title = "",
                        Data_input = "Z-score expression",
                        anno_1 = meta_heat[,input$top_anno], anno_1_name = input$top_anno, anno_1_cols = NULL,
-                       anno_2 = NULL, anno_2_name = NULL, anno_2_cols = NULL,
                        cluster_rows = input$cluster_rows, cluster_cols = input$cluster_cols,
                        reorder_rows = input$cluster_rows, reorder_cols = input$cluster_cols,
                        row_names = input$row_names, col_names = input$col_names,
-                       row_fontsize = input$row_fontsize, col_fontsize = input$col_fontsize,
-                       show_hclust_n = 0, show_pearson = F)
+                       row_fontsize = input$row_fontsize, col_fontsize = input$col_fontsize)
 
       return(plot)
 
