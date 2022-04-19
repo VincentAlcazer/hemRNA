@@ -8,7 +8,6 @@ anno_pal = viridis_pal, hue_pal, grey_pal...}
 \usage{
 fast_map(
   df,
-  top_features_p = 1,
   center_scale = T,
   heat_colors = colorRampPalette(c("#3361A5", "#248AF3", "#14B3FF", "#88CEEF",
     "#C1D5DC", "#EAD397", "#FDB31A", "#E42A2A", "#A31D1D"))(100),
@@ -21,9 +20,6 @@ fast_map(
   anno_1 = NULL,
   anno_1_name = NULL,
   anno_1_cols = NULL,
-  anno_2 = NULL,
-  anno_2_name = NULL,
-  anno_2_cols = NULL,
   cluster_rows = T,
   cluster_cols = T,
   reorder_rows = T,

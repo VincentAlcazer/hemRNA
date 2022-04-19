@@ -278,14 +278,13 @@ circos_plot <- function(expression,cnv,variant, arriba, bed,
 #'
 
 
-fast_map <- function(df, top_features_p = 1, center_scale = T,
+fast_map <- function(df, center_scale = T,
                      heat_colors=colorRampPalette(c('#3361A5','#248AF3','#14B3FF','#88CEEF','#C1D5DC',
                                                     '#EAD397','#FDB31A','#E42A2A','#A31D1D'))(100),
                      anno_pal = viridis_pal(),
                      Zlim = 3, method = "ward.D2", metric = "euclidean", title = "title",
                      Data_input = "Z-score expression",
                      anno_1 = NULL, anno_1_name = NULL, anno_1_cols = NULL,
-                     anno_2 = NULL, anno_2_name = NULL, anno_2_cols = NULL,
                      cluster_rows = T, cluster_cols = T,
                      reorder_rows = T, reorder_cols = T,
                      row_names = T,col_names=T,
@@ -342,12 +341,7 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
 
       ##### ===== 1 unique categorical annotation
 
-      if(is.null(anno_1_cols)){
-        ha_1 <- anno_pal(length(unique(na.omit(anno_1))))
-      } else {
-        ha_1 <- anno_1_cols
-      }
-
+      ha_1 <- anno_pal(length(unique(na.omit(anno_1))))
       names(ha_1) <- unique(na.omit(anno_1))
 
       col_list <- list(supha_1 = ha_1)
@@ -375,14 +369,12 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
   message("Prepare df ")
 
   matrix <- df
-  matrix <- matrix[,order(apply(matrix, 2, var), decreasing = T)[1:round(top_features_p*ncol(matrix))]]
-
   if(center_scale == T){
     matrix <- scale(matrix)
   }
 
 
-  message("Plot heatmap ")
+  message("set heatmap ")
   ht <-   ComplexHeatmap::Heatmap(t(matrix),
                   name = "heat",
                   col = heat_col,
@@ -415,7 +407,8 @@ fast_map <- function(df, top_features_p = 1, center_scale = T,
                   )
 
 ### draw
-  draw(ht,annotation_legend_list = sup_leg, annotation_legend_side = "bottom", newpage = T)
+  message("Plot heatmap")
+  draw(ht, annotation_legend_list = sup_leg, annotation_legend_side = "bottom", newpage = T)
 
 
 

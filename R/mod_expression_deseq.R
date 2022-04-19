@@ -409,7 +409,7 @@ mod_expression_deseq_server <- function(id, r){
                        anno_pal = viridis_pal(),
                        Zlim = 3, method = input$method, metric = input$metric, title = "",
                        Data_input = "Z-score expression",
-                       anno_1 = meta_heat[,input$top_anno], anno_1_name = input$top_anno, anno_1_cols = NULL,
+                       anno_1 = meta_heat[,input$top_anno], anno_1_name = input$top_anno,
                        cluster_rows = input$cluster_rows, cluster_cols = input$cluster_cols,
                        reorder_rows = input$cluster_rows, reorder_cols = input$cluster_cols,
                        row_names = input$row_names, col_names = input$col_names,
