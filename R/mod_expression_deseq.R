@@ -386,21 +386,28 @@ mod_expression_deseq_server <- function(id, r){
       req(df_filt())
       req(meta())
 
-      features <- deseq2_res() %>% filter(padj < input$padj & abs(log2FoldChange) >= input$FC) %>%
+      features <- deseq2_res() %>% filter(padj < input$padj & abs(log2FoldChange) >= log2(input$FC)) %>%
         distinct(gene_name) %>% unlist() %>% as.character()
 
+      message("n_features:",length(features))
       data_heat <-  df_filt() %>%
         filter(gene_name %in% features) %>%
         column_to_rownames("gene_name") %>% t()
 
       samples <- intersect(unique(meta()$patient_id),rownames(data_heat))
 
+      message("n_features:",length(samples))
+
+      message("processing data_heat")
       data_heat <- data_heat[samples,]
 
+      message("processing meta_heat")
       meta_heat <- meta()
       rownames(meta_heat) <- meta_heat$patient_id
       meta_heat <- meta_heat[samples,]
 
+
+      message("plot heatmap")
       plot <- fast_map(data_heat,
                        center_scale = T,
                        heat_colors="ATAC",
