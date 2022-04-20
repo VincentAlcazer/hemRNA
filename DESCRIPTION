@@ -6,6 +6,7 @@ Description: PKG_DESC.
 License: MIT + file LICENSE
 Imports: 
     apeglm,
+    ashr,
     attempt,
     BioCircos,
     BiocManager,
@@ -35,6 +36,7 @@ Imports:
     shinyFiles,
     tibble,
     tidyr,
+    tximport,
     vcfR,
     viridis
 Encoding: UTF-8

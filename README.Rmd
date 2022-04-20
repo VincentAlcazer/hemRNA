@@ -36,6 +36,7 @@ You can install the development version from [GitHub](https://github.com/Vincent
  hemRNA::run_app()
  
 ## Local file install
+# Download and unzip hemRNA folder from github, then run from R:
  
 install.packages("path_to_hemRNA-master_folder", repos = NULL, type="source", force = T)
  

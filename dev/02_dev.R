@@ -38,6 +38,7 @@ usethis::use_package("BiocManager")
 usethis::use_package("ComplexHeatmap")
 usethis::use_package("grid")
 usethis::use_package("circlize")
+usethis::use_package("ashr")
 
 
 ## Add modules ----

@@ -30,7 +30,8 @@ repository or directly downloading the package in R:
  hemRNA::run_app()
  
 ## Local file install
+# Download and unzip hemRNA folder from github, then run from R:
  
-install.packages("path_to_hemRNA-master.zip", repos = NULL, type="source", force = T)
+install.packages("path_to_hemRNA-master_folder", repos = NULL, type="source", force = T)
  
 ```

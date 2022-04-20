@@ -351,7 +351,8 @@ mod_expression_deseq_server <- function(id, r){
 
 
       #Volcano plot
-      plot <- volcano_df %>% na.omit %>%
+      plot <- volcano_df %>%
+        #na.omit %>%
         ggplot(aes(x = log2FoldChange, y = -log10(padj))) +
         geom_point(aes(color = color), size = 2) +
         geom_text_repel(aes(label = genelabels), size = 6) +
