@@ -7,16 +7,23 @@
 app_server <- function( input, output, session ) {
   # Your application server logic
 
+  options(shiny.maxRequestSize = 40 * 1024^2)
 
   #################### ==================== Dataframe loading  ====================  ####################
 
+  ##### ===== Set R or load full environment
   r <- reactiveValues(
     test = reactiveValues()
-  )
+    )
+
+  observe({
+    req(input$env_loading)
+    r$test <- readRDS(input$env_loading$datapath)$test
+  })
 
   ##### ===== Full results folder
 
-  # ## For volumes parse
+  ### Folder loading
   volumes <- getVolumes()
   shinyDirChoose(input, 'folder_path', root=volumes, session=session)
   folder_path <- reactive({
@@ -29,6 +36,9 @@ app_server <- function( input, output, session ) {
   # folder_path <- reactive({
   #   return(print(parseDirPath(c(root='../'), input$folder_path)))
   # })
+
+  ### Direct environment loading
+
 
   ##### ===== Signatures list
 
@@ -578,6 +588,17 @@ app_server <- function( input, output, session ) {
   })
 
 
+  ##### ===== Save environment
+
+
+  output$save_env <- downloadHandler(
+    filename = function() {
+      paste("full_environment.rds")
+    },
+    content = function(file) {
+      saveRDS(r, file)
+    }
+  )
 
 
   output$preview_data <- DT::renderDT(
@@ -619,7 +640,7 @@ app_server <- function( input, output, session ) {
   #################### ==================== App modules ====================  ####################
 
   mod_home_server("home_ui_1")
-  mod_data_server("data_ui_1")
+  #mod_data_server("data_ui_1")
 
   mod_overview_server("overview_1", r=r)
 

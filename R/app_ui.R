@@ -15,7 +15,7 @@ app_ui <- function(request) {
     dashboardPage(
 
       header = dashboardHeader(
-        title = "hemRNA v0.85"
+        title = "hemRNA v0.86"
       ),
 
       #################### ==================== SIDEBAR ====================  ####################
@@ -60,8 +60,17 @@ app_ui <- function(request) {
 
                                box(title = "Folder", width = 6,
                                    ### === Load results folder
-                                   HTML("<b>Select results folder</b></br>"),
+                                   HTML("<b>Select results folder (not available in online version)</b></br>"),
                                    shinyDirButton('folder_path', label='Browse...', title='Please select a folder'),
+                                   div(style = "margin-top: 20px"),
+
+                                   HTML("<b>Or directly load environment </b></br>"),
+                                   fileInput("env_loading",
+                                             label = ("full_environment.rds"),
+                                             accept = c(
+                                               ".rds"
+                                             )
+                                   ),
                                    div(style = "margin-top: 20px"),
 
                                    ### === Load bed
@@ -87,7 +96,9 @@ app_ui <- function(request) {
                                    htmlOutput("hotspot_check"),
                                    htmlOutput("RNAmut_check"),
 
-                                   htmlOutput("cnv_check")
+                                   htmlOutput("cnv_check"),
+
+                                   downloadButton("save_env", "Save full environment (rds)")
 
                                     # p("Preview"),
                                     # downloadButton("download_table", "Download table (.tsv)"),
