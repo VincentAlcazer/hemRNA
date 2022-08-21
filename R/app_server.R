@@ -350,7 +350,7 @@ app_server <- function( input, output, session ) {
       file_list <- list()
       for(i in 1:length(files)){
 
-        file_list[[names(files[i])]] <- read.delim(files[i], dec=",", stringsAsFactors = F, row.names = NULL) %>%
+        file_list[[names(files[i])]] <- data.table::fread(files[i],  data.table = F) %>%
           mutate(WTReads = as.character(WTReads))
 
       }
